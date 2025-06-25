@@ -1,0 +1,6 @@
+subscription_id = <your Azure subscription ID>
+resource_group_name = <name for resource group>
+location = <location> # e.g. "France Central"
+postgres_server_name = <name for your postgres server>
+db_admin = <login>
+db_password = <password>
