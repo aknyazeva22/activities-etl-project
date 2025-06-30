@@ -195,3 +195,10 @@ cython_debug/
 
 # Terraform
 terraform.tfvars
+
+# dbt
+
+dbt/dbt_activities/target/
+dbt/dbt_activities/dbt_packages/
+dbt/dbt_activities/logs/
+
