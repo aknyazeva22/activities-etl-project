@@ -1,0 +1,364 @@
+version: 2
+
+models:
+  - name: activities_raw
+    description: Raw staging model for the degustation tourism dataset
+    columns:
+      - name: "Nom de l'offre touristique"
+        description: Name of the tourist offer
+
+      - name: "Type d'offre"
+        description: Type of offer (e.g., wine, cheese, etc.)
+
+      - name: Adresse1
+        description: Primary address field
+
+      - name: Adresse1Suite
+        description: Adresse 1 continue
+
+      - name: "Adresse partie 2"
+        description: Adresse part 2
+
+      - name: "Adresse partie 3"
+        description: Adresse part 3
+
+      - name: "Code postal"
+        description: Postal code
+
+      - name: "Bureau distributeur de l'adresse postale"
+        description: Postal address
+
+      - name: "Commune du lieu de visite"
+        description: Commune
+
+      - name: Cedex
+        description: Cedex
+
+      - name: "Code Insee de la Commune"
+        description: Commune Code
+
+      - name: Latitude
+        description: Latitude (decimal degrees)
+
+      - name: Longitude
+        description: Longitude (decimal degrees)
+
+      - name: "Situation de l'offre"
+        description: Situation
+
+      - name: "N° de téléphone mobile"
+        description: Mobile phone
+
+      - name: "N° de téléphone fixe"
+        description: Landline number
+
+      - name: "N° de fax"
+        description: Fax
+
+      - name: "Adresse e-Mail"
+        description: E-mail
+
+      - name: "Url du site web"
+        description: Website URL
+
+      - name: "Url pour accéder à la vidéo"
+        description: URL to access the video
+
+      - name: "Code Embed pour intégrer une vidéo"
+        description: Embed code for integrating a video
+
+      - name: "Type de plateforme/url"
+        description: Type of platform or video URL
+
+      - name: "Widget tripadvisor"
+        description: Tripadvisor widget or integration
+
+      - name: "Secteur d'activité"
+        description: Sector of activity (e.g., wine, gastronomy)
+
+      - name: "Labels"
+        description: Quality labels associated with the offer
+
+      - name: "Label tourisme handicap"
+        description: Accessibility label for disabled tourists
+
+      - name: "Animal accepté: oui / non"
+        description: Whether animals are accepted
+
+      - name: "Complément information animal accepté"
+        description: Additional information regarding animal acceptance
+
+      - name: "Groupe accepté: oui / non"
+        description: Whether groups are accepted
+
+      - name: "Nombre personnes max pour les groupes"
+        description: Maximum number of people allowed in groups
+
+      - name: "Nombre personnes min pour les groupes"
+        description: Minimum number of people required for group visits
+
+      - name: "Langues parlées à l'accueil"
+        description: Languages spoken at the reception
+
+      - name: "Appellation pour les vins"
+        description: Wine appellation (e.g., AOC, IGP)
+
+      - name: "Dégustations gratuites: oui / non"
+        description: Whether tastings are free of charge
+
+      - name: "Salle équipée pour dégustation: oui / non"
+        description: Whether a tasting room is available and equipped
+
+      - name: "Vente à la propriété: oui / non"
+        description: Whether on-site sales are available
+
+      - name: "Durée de visite pour les individuels"
+        description: Duration of visit for individual visitors
+
+      - name: "Durée de visite pour les groupes"
+        description: Duration of visit for group visitors
+
+      - name: "Visites guidées proposées aux groupes en permanence: oui / no"
+        description: Guided group visits offered on a regular basis
+
+      - name: "Visites guidées proposées aux groupes sur demande: oui / non"
+        description: Guided group visits available on request
+
+      - name: "Visites libres proposées aux groupes en permanence: oui / non"
+        description: Self-guided group visits available on a regular basis
+
+      - name: "Visites pédagogiques proposées aux groupes en permanence: oui"
+        description: Educational visits offered to groups on a regular basis
+
+      - name: "Visites guidées proposées aux individuels en permanence: oui"
+        description: Guided visits for individuals offered on a regular basis
+
+      - name: "Visites guidées proposées aux individuels sur demande: oui /"
+        description: Guided visits for individuals available on request
+
+      - name: "Langue(s) parlée(s) pendant les visites"
+        description: Languages spoken during guided visits
+
+      - name: "Visites libres proposées aux individuels en permanence: oui /"
+        description: Self-guided visits for individuals offered on a regular basis
+
+      - name: "Les offres proposées"
+        description: Types of offers proposed (e.g., tastings, visits, sales)
+
+      - name: "Ouvert toute l'année: oui / non"
+        description: Open all year round
+
+      - name: "Horaires d'ouvertures"
+        description: Opening hours
+
+      - name: "Moyen(s) de réservation directe"
+        description: Methods of direct reservation
+
+      - name: "Moyen(s) de réservation en ligne"
+        description: Online reservation methods
+
+      - name: "Centrale de réservation en ligne?"
+        description: Whether an online booking platform is used
+
+      - name: "Tarif gratuit : oui / non"
+        description: Whether the service is free of charge
+
+      - name: "Tarif"
+        description: Pricing information
+
+      - name: "Modes de paiement acceptés"
+        description: Accepted payment methods
+
+      - name: "localisation"
+        description: Geographic location or coordinates
+
+      - name: "departement"
+        description: Administrative department
+
+  - name: stg_raw_degustation_data
+    description: Raw staging model for the degustation tourism dataset
+    columns:
+      - name: offer_name
+        description: Name of the tourist offer
+        tests:
+          - not_null
+
+      - name: offer_type
+        description: Type of offer (e.g., wine, cheese, etc.)
+
+      - name: address_line1
+        description: Primary address field
+
+      - name: address_line2
+        description: Adresse 1 continue
+
+      - name: address_line3
+        description: Adresse part 2
+
+      - name: address_line4
+        description: Adresse part 3
+
+      - name: code_postal
+        description: Code postal
+
+      - name: postal_office
+        description: Postal office address
+
+      - name: city_name
+        description: City of the degustation offer
+
+      - name: cedex
+        description: Cedex
+
+      - name: city_code
+        description: City code
+
+      - name: latitude
+        description: Latitude
+        tests:
+          - not_null
+
+      - name: longitude
+        description: Longitude
+        tests:
+          - not_null
+
+      - name: transport_tips
+        description: Transport tips
+
+      - name: modile_phone_number
+        description: Mobile phone number
+
+      - name: landline_number
+        description: Landline number
+
+      - name: fax
+        description: Fax number
+
+      - name: email
+        description: E-mail
+
+      - name: website
+        description: Website
+
+      - name: video_url
+        description: URL to access the video
+
+      - name: code_integration_video
+        description: Embed code to embed a video
+
+      - name: plateforme_type
+        description: Platform type/url
+
+      - name: tripadvisor_widget
+        description: Tripadvisor widget
+
+      - name: activity_sector
+        description: Activity sector
+
+      - name: quality_label
+        description: Quality labels associated with the offer
+
+      - name: accessibility_label
+        description: Accessibility label for disabled tourists
+
+      - name: animal_acceptance
+        description: Whether animals are accepted
+        tests:
+          - accepted_values:
+              values: ['oui', 'non']
+
+      - name: animal_acceptance_info
+        description: Additional information regarding animal acceptance
+
+      - name: group_acceptance
+        description: Whether groups are accepted
+        tests:
+          - accepted_values:
+              values: ['oui', 'non']
+
+      - name: maximum_group_size
+        description: Maximum number of people allowed in groups
+
+      - name: minimum_group_size
+        description: Minimum number of people required for group visits
+
+      - name: languages
+        description: Languages spoken at the reception
+
+      - name: wine_appellation
+        description: Wine appellation (e.g., AOC, IGP)
+
+      - name: free_tastings
+        description: Whether tastings are free of charge
+        tests:
+          - accepted_values:
+              values: ['oui', 'non']
+
+      - name: tasting_room
+        description: Whether a tasting room is available and equipped
+        tests:
+          - accepted_values:
+              values: ['oui', 'non']
+
+      - name: on_site_sales
+        description: Whether on-site sales are available
+        tests:
+          - accepted_values:
+              values: ['oui', 'non']
+
+      - name: duration_individual_visit
+        description: Duration of visit for individual visitors
+
+      - name: duration_group_visit
+        description: Duration of visit for group visitors
+
+      - name: regular_guided_group_visits
+        description: Guided group visits offered on a regular basis
+        tests:
+          - accepted_values:
+              values: ['oui', 'non']
+
+      - name: guided_group_visit_on_request
+        description: Guided group visits available on request
+        accepted_values:
+          values: ['Oui', 'Non']
+
+      - name: regular_self_guided_group_visits
+        description: Self-guided group visits available on a regular basis
+        tests:
+          - accepted_values:
+              values: ['oui', 'non']
+
+      - name: regular_educational_group_visits
+        description: Educational visits offered to groups on a regular basis
+        tests:
+          - accepted_values:
+              values: ['oui', 'non']
+
+      - name: regular_guided_individual_visits
+        description: Guided visits for individuals offered on a regular basis
+        tests:
+          - accepted_values:
+              values: ['oui', 'non']
+
+      - name: guided_individual_visit_on_request
+        description: Guided visits for individuals available on request
+        tests:
+          - accepted_values:
+              values: ['oui', 'non']
+
+      - name: languages_of_guided_visits
+        description: Languages spoken during guided visits
+
+      - name: regular_self_guided_individual_visits
+        description: Self-guided visits for individuals offered on a regular basis
+        tests:
+          - accepted_values:
+              values: ['oui', 'non']
+
+      - name: activity_type
+        description: Types of offers proposed (e.g., tastings, visits, sales)
+
+    tests:
+      - contact_info
