@@ -49,8 +49,14 @@ SELECT
   "Visites guidées proposées aux individuels sur demande: oui / " AS guided_individual_visit_on_request,
   "Langue(s) parlée(s) pendant les visites" AS languages_of_guided_visits,
   "Visites libres proposées aux individuels en permanence: oui / " AS regular_self_guided_individual_visits,
-  "Les offres proposées" AS activity_type
-
-
-
+  "Les offres proposées" AS activity_type,
+  CASE
+      WHEN "Adresse1"        IS NOT NULL
+       AND "Adresse1Suite"   IS NOT NULL
+       AND "Adresse partie 2" IS NOT NULL
+       AND "Adresse partie 3" IS NOT NULL
+      THEN TRUE
+      ELSE FALSE
+  END AS is_address_given
+  
 FROM {{ source('raw', 'raw_degustation_data') }}
