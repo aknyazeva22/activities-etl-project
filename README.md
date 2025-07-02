@@ -37,11 +37,12 @@ This ELT pipeline includes:
 │   └── degustations.csv
 │
 ├── scripts/ # Python scripts
+│    ├── generate_profiles.py
 │    └── load_raw_data.py
 │
 ├── dbt/ # dbt project directory
 | └── dbt_activities
-│    ├── models/
+│    └── models/
 |        ├── activities
 |        |    ├── schema.yml
 |        |    └── sources.yml
