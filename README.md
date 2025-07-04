@@ -11,6 +11,7 @@ This ELT pipeline includes:
 1. **Infrastructure provisioning** with Terraform (Azure PostgreSQL Flexible Server)
 2. **Data loading** from a CSV file into the raw schema with a Python script
 3. **Data transformation** using dbt to build a cleaned table with degustation information
+4. **Pipeline orchestration** with Dagster
 
 ---
 
@@ -20,6 +21,7 @@ This ELT pipeline includes:
 - **Terraform** for IaC
 - **Python (pandas, sqlalchemy)** for raw data loading
 - **dbt (Data Build Tool)** for SQL-based transformations
+- **Dagster** for orchestration and observability
 
 ---
 
@@ -27,19 +29,11 @@ This ELT pipeline includes:
 
 
 ```
-├── terraform/ # Terraform config for Azure infrastructure
-│ ├── main.tf
-│ ├── variables.tf
-│ ├── outputs.tf
-│ └── terraform_tfvars_template.txt
-│
 ├── data/ # Raw data source
 │   └── degustations.csv
-│
-├── scripts/ # Python scripts
-│    ├── generate_profiles.py
-│    └── load_raw_data.py
-│
+├── orchestration
+│   ├── assets.py
+│   └── definitions.py
 ├── dbt/ # dbt project directory
 | └── dbt_activities
 │    └── models/
@@ -48,8 +42,17 @@ This ELT pipeline includes:
 |        |    └── sources.yml
 |        └── staging
 |             └── stg_raw_degustation_data.sql
-│
-└── README.md
+├── pyproject.toml
+├── README.md
+├── scripts/ # Python scripts
+│    ├── generate_profiles.py
+│    └── load_raw_data.py
+├── setup.py
+└── terraform/ # Terraform config for Azure infrastructure
+     ├── main.tf
+     ├── outputs.tf
+     ├── terraform_tfvars_template.txt
+     └── variables.tf
 ```
 
 
@@ -90,6 +93,15 @@ DB_HOST=
 DB_PORT=5432
 DB_NAME=
 ```
+
+### Run Data Load Step with Dagster
+
+```
+dagster dev
+```
+
+In the Dagster UI you could choose `loaded_data` asset and materialize it.
+
 
 You must run this step after the PostgreSQL server is created.
 

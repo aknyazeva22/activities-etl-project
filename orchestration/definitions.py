@@ -12,6 +12,6 @@ resources = {
 }
 
 defs = Definitions(
-    assets=[assets.raw_data, assets.loaded_data],
+    assets=assets.__all_assets__,
     resources=resources,
 )
