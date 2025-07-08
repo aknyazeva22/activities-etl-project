@@ -1,6 +1,6 @@
 from dagster import Definitions, load_assets_from_modules
 from dagster_dbt import DbtCliResource
-from orchestration import assets
+from orchestration import assets, jobs
 
 all_assets = load_assets_from_modules([assets])
 
@@ -14,4 +14,9 @@ resources = {
 defs = Definitions(
     assets=assets.__all_assets__,
     resources=resources,
+    jobs=[
+        jobs.provision_infra,
+        jobs.raw_data_job,
+        jobs.load_data_job,
+    ],
 )
