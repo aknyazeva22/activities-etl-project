@@ -3,6 +3,12 @@ import runpy
 from dagster import AssetExecutionContext, asset
 from dagster_dbt import dbt_assets
 
+# Infrastructure
+@asset
+def azure_psql_server(context: AssetExecutionContext) -> None:
+    context.log.info("Create infrastructure with terraform")
+    runpy.run_module("scripts.create_postgresql_server", run_name="__main__")
+
 
 # Extract
 @asset
@@ -12,7 +18,7 @@ def raw_data(context: AssetExecutionContext) -> None:
 
 # Load
 @asset(
-    deps=[raw_data],
+    deps=[raw_data, azure_psql_server],
     description="Load degustations.csv into PostgreSQL as a raw table."
 )
 def loaded_data(context: AssetExecutionContext) -> None:
@@ -21,6 +27,7 @@ def loaded_data(context: AssetExecutionContext) -> None:
 
 
 __all_assets__ = [
+    azure_psql_server,
     raw_data,
     loaded_data,
 ]

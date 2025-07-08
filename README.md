@@ -31,9 +31,10 @@ This ELT pipeline includes:
 ```
 ├── data/ # Raw data source
 │   └── degustations.csv
-├── orchestration
+├── orchestration # Dagster configuration
 │   ├── assets.py
-│   └── definitions.py
+│   ├── definitions.py
+│   └── jobs.py
 ├── dbt/ # dbt project directory
 | └── dbt_activities
 │    └── models/
@@ -45,6 +46,7 @@ This ELT pipeline includes:
 ├── pyproject.toml
 ├── README.md
 ├── scripts/ # Python scripts
+│    ├── create_postgresql_server.py
 │    ├── generate_profiles.py
 │    └── load_raw_data.py
 ├── setup.py
@@ -55,98 +57,36 @@ This ELT pipeline includes:
      └── variables.tf
 ```
 
+# Getting Started
 
-# Terraform Infrastructure
-
-## Components
-
-- Azure Resource group
-- Azure Database for PostgreSQL flexible server
-
-## Configuration
-
-Copy `terraform_tfvars_template.txt` to `terraform.tfvars` and set required variables there.
-
-## Getting Started
+## Clone & bootstrap
 
 ```
-cd terraform
-terraform init
-terraform plan
-terraform apply
+git clone https://github.com/aknyazeva22/activities-etl-project.git
+cd activities-etl-project
+cp env.template .env  # fill in secrets
 ```
 
-## Data Load with Python
-
-This script loads the CSV file into the PostgreSQL database:
-
-```
-python scripts/load_raw_data.py
-```
-
-Ensure your .env file or environment variables contain:
-
-```
-DB_USER=
-DB_PASSWORD=
-DB_HOST=
-DB_PORT=5432
-DB_NAME=
-```
-
-### Run Data Load Step with Dagster
+## Launch Dagster
 
 ```
 dagster dev
 ```
 
-In the Dagster UI you could choose `loaded_data` asset and materialize it.
+## Run the provision_infra job
 
+In the Dagster UI, select **Jobs -> `provision_infra` -> Launch**
 
-You must run this step after the PostgreSQL server is created.
-
-## Data Transformation with dbt
-
-This section covers how to configure and run dbt models. The goal is to take raw data from the `public.raw_degustation_data` table and create a cleaned, structured view.
-
-## Configure dbt
-
-Before running dbt, you need a `profiles.yml` file that defines your database connection. You can create it in two ways:
-
-### Option 1: Initialize with dbt
-
-Run:
+Or headless
 
 ```
-dbt init
+dagster job execute -f dagster/jobs.py -j provision_infra
 ```
 
-Follow the prompts to set up your profile manually.
+That single run will:
 
-### Option 2: Generate Automatically from Terraform Output
-
-You can generate the profiles.yml file automatically:
-
-```
-python scripts/generate_profiles.py
-```
-
-This script reads Terraform outputs and creates the necessary dbt configuration in `dbt/dbt_activities/profiles.yml`.
-
-## 2. Run and Test dbt
-
-Navigate to the dbt project directory:
-
-```
-cd dbt/dbt_activities
-```
-
-Then run the following commands:
-
-```
-dbt run   # executes the transformation models
-dbt test  # runs data quality checks
-```
+1. `terraform init / plan / apply` to spin up Azure PostgreSQL
+2. Make connection details available to downstream ops (dbt, Python ETL, etc.)
 
 
 # ELT Pipeline Architecture
