@@ -16,7 +16,8 @@ defs = Definitions(
     resources=resources,
     jobs=[
         jobs.provision_infra,
-        jobs.raw_data_job,
+        jobs.get_raw_data,
         jobs.load_data_job,
+        jobs.dbt_profiles_job,
     ],
 )
