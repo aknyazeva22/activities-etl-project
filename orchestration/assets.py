@@ -14,7 +14,7 @@ def azure_psql_server(context: AssetExecutionContext) -> None:
 @asset
 def raw_data(context: AssetExecutionContext) -> None:
     context.log.info("Running extract step")
-    # TODO: add raw data extraction here
+    runpy.run_module("scripts.download_raw_data", run_name="__main__")
 
 # Load
 @asset(
@@ -25,9 +25,19 @@ def loaded_data(context: AssetExecutionContext) -> None:
     context.log.info("Running load step")
     runpy.run_module("scripts.load_raw_data", run_name="__main__")
 
+# Load
+@asset(
+    deps=[azure_psql_server],
+    description="Create dbt profiles from infra creation step."
+)
+def dbt_profiles(context: AssetExecutionContext) -> None:
+    context.log.info("Creating profiles for dbt from the infrastructure")
+    runpy.run_module("scripts.generate_profiles", run_name="__main__")
+
 
 __all_assets__ = [
     azure_psql_server,
     raw_data,
     loaded_data,
+    dbt_profiles,
 ]

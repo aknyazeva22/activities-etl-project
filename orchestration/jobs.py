@@ -1,5 +1,6 @@
 from dagster import define_asset_job
 
+
 # Terraform
 provision_infra = define_asset_job(
     name="provision_infra",
@@ -7,8 +8,8 @@ provision_infra = define_asset_job(
 )
 
 # Get Input Data
-raw_data_job = define_asset_job(
-    name="raw_data_job",
+get_raw_data = define_asset_job(
+    name="get_raw_data",
     selection="raw_data",
 )
 
@@ -16,4 +17,10 @@ raw_data_job = define_asset_job(
 load_data_job = define_asset_job(
     name="load_data_job",
     selection="loaded_data",
+)
+
+# Configure dbt
+dbt_profiles_job = define_asset_job(
+    name="dbt_profiles_job",
+    selection="dbt_profiles",
 )
