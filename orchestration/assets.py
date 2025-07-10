@@ -18,10 +18,10 @@ def raw_data(context: AssetExecutionContext) -> None:
 
 # Load
 @asset(
-    deps=[raw_data, azure_psql_server],
+    deps=[raw_data, azure_psql_server, dbt_profiles],
     description="Load degustations.csv into PostgreSQL as a raw table."
 )
-def loaded_data(context: AssetExecutionContext) -> None:
+def raw_degustation_data(context: AssetExecutionContext) -> None:
     context.log.info("Running load step")
     runpy.run_module("scripts.load_raw_data", run_name="__main__")
 
@@ -33,11 +33,3 @@ def loaded_data(context: AssetExecutionContext) -> None:
 def dbt_profiles(context: AssetExecutionContext) -> None:
     context.log.info("Creating profiles for dbt from the infrastructure")
     runpy.run_module("scripts.generate_profiles", run_name="__main__")
-
-
-__all_assets__ = [
-    azure_psql_server,
-    raw_data,
-    loaded_data,
-    dbt_profiles,
-]
