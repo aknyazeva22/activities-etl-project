@@ -67,6 +67,30 @@ cd activities-etl-project
 cp env.template .env  # fill in secrets
 ```
 
+## Connect to Azure
+
+Before working with this repository, make sure you are authenticated to your Azure account.
+
+Open a terminal or command prompt.
+
+Run the following command:
+
+```
+az login
+```
+
+A browser window will open prompting you to sign in with your Azure credentials. Follow the on-screen instructions.
+
+If you have multiple subscriptions, you can set the active subscription after logging in using:
+
+```
+az account set --subscription "<subscription-name-or-id>"
+```
+
+Important: Also add your <subscription-name-or-id> to the .env file in this repository so that other tools and scripts can reference it.
+
+You must have the Azure CLI installed. If not, see [Install the Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) before proceeding.
+
 ## Launch Dagster
 
 ```
