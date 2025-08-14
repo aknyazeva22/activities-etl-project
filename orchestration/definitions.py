@@ -23,20 +23,15 @@ dbt_project.prepare_if_dev()
 def dbt_models(context: AssetExecutionContext, dbt: DbtCliResource):
     yield from dbt.cli(["build"], context=context).stream()
 
-
 defs = Definitions(
     assets=[
         dbt_models,
-        assets.azure_psql_server,
+        assets.dbt_profiles,
         assets.raw_data,
         assets.raw_degustation_data,
-        assets.dbt_profiles,
     ],
     resources=resources,
     jobs=[
         jobs.provision_infra,
-        jobs.get_raw_data,
-        jobs.load_data_job,
-        jobs.dbt_profiles_job,
     ],
 )
