@@ -17,11 +17,42 @@ This ELT pipeline includes:
 
 ## Technologies Used
 
-- **Azure** (PostgreSQL Flexible Server)
-- **Terraform** for IaC
+- **PostgreSQL** as the target database:
+  - **Option 1: Azure PostgreSQL Flexible Server**, provisioned via Terraform (Infrastructure as Code)
+  - **Option 2: PostgreSQL in Docker**, for local development without cloud resources
+- **Terraform** for infrastructure provisioning (Azure option)
 - **Python (pandas, sqlalchemy)** for raw data loading
 - **dbt (Data Build Tool)** for SQL-based transformations
 - **Dagster** for orchestration and observability
+
+---
+
+## Choose Your Deployment Mode
+
+This project supports two modes depending on your environment and needs:
+
+1. Azure + Terraform (Cloud)
+
+Provisions a PostgreSQL Flexible Server on Azure using Terraform.
+
+Best suited for production or team environments.
+
+Requires an active Azure subscription and credentials configured via az login.
+
+Add to your .env file `DB_PROVIDER=azure`
+
+2. Local Development (Docker)
+
+Spins up a PostgreSQL instance inside a Docker container.
+
+Ideal for development, testing, or cost-free experimentation.
+
+Requires only Docker and Docker Compose installed locally.
+
+Add to your .env file `DB_PROVIDER=local`
+
+
+Both modes are fully compatible with the rest of the stack (Python ingestion, dbt transformations, Dagster orchestration). You can switch between them by updating DB_PROVIDER in your .env file.
 
 ---
 
@@ -43,6 +74,7 @@ This ELT pipeline includes:
 |        |    └── sources.yml
 |        └── staging
 |             └── stg_raw_degustation_data.sql
+├── docker-compose.yml # Docker config for local PostgreSQL
 ├── pyproject.toml
 ├── README.md
 ├── scripts/ # Python scripts
