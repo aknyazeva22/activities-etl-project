@@ -18,8 +18,8 @@ This ELT pipeline includes:
 ## Technologies Used
 
 - **PostgreSQL** as the target database:
-  - **Option 1: Azure PostgreSQL Flexible Server**, provisioned via Terraform (Infrastructure as Code)
-  - **Option 2: PostgreSQL in Docker**, for local development without cloud resources
+  - **Option 1 (Cloud): Azure PostgreSQL Flexible Server**, provisioned via Terraform (Infrastructure as Code)
+  - **Option 2 (Docker): PostgreSQL in Docker**, for local development without cloud resources
 - **Terraform** for infrastructure provisioning (Azure option)
 - **Python (pandas, sqlalchemy)** for raw data loading
 - **dbt (Data Build Tool)** for SQL-based transformations
@@ -99,7 +99,7 @@ cd activities-etl-project
 cp env.template .env  # fill in secrets
 ```
 
-## Connect to Azure
+## Connect to Azure (Cloud)
 
 Before working with this repository, make sure you are authenticated to your Azure account.
 
@@ -122,6 +122,48 @@ az account set --subscription "<subscription-name-or-id>"
 Important: Also add your <subscription-name-or-id> to the .env file in this repository so that other tools and scripts can reference it.
 
 You must have the Azure CLI installed. If not, see [Install the Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) before proceeding.
+
+## Run Docker (Docker)
+
+If you prefer to use a local PostgreSQL instance instead of Azure, you can launch it with Docker.
+
+1. Make sure you have **Docker** and **Docker Compose** installed.
+2. Configure your .env file with the required variables. You need to set these variables:
+
+```
+DB_PROVIDER=local
+DB_USER=<username>
+DB_PASSWORD=<password>
+DB_NAME=<database_name>
+DB_PORT=<port>
+PGDATA_DIR=<host_directory>   # e.g., /var/lib/postgresql/data
+```
+
+`PGDATA_DIR` is the directory on your local filesystem where Postgres data will be stored persistently.
+
+
+3. Start the container:
+```
+docker compose up -d
+```
+4. Verify that PostgreSQL is running:
+```
+docker ps
+```
+You should see a container whose name includes **postgres** (e.g., projectname-postgres-1).
+
+5. Connect to the database (optional):
+```
+psql -h localhost -U $DB_USER -d $DB_NAME -p $DB_PORT
+```
+
+The password will be the value of `DB_PASSWORD` from your .env file.
+
+
+6. To stop the container:
+```
+docker compose down
+```
 
 ## Launch Dagster
 
