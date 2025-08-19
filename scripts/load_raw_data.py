@@ -13,18 +13,18 @@ TABLE_NAME = 'raw_degustation_data'
 SCHEMA = 'public'
 
 load_dotenv()
+# Load environment variables
+DB_PROVIDER = os.environ.get('DB_PROVIDER')
+DB_USER = os.environ.get('DB_USER')
+DB_PASSWORD = os.environ.get('DB_PASSWORD')
+DB_HOST = "localhost" if DB_PROVIDER == "local" else os.environ.get('DB_HOST')
+DB_PORT = os.environ.get('DB_PORT', '5432')
+DB_NAME = os.environ.get('DB_NAME')
 
 def get_engine() -> Engine:
     """
     Build a SQLAlchemy Engine from environment variables.
     """
-    # Load environment variables
-    DB_USER = os.environ.get('DB_USER')
-    DB_PASSWORD = os.environ.get('DB_PASSWORD')
-    DB_HOST = os.environ.get('DB_HOST')
-    DB_PORT = os.environ.get('DB_PORT', '5432')
-    DB_NAME = os.environ.get('DB_NAME')
-
     # Create connection string
     conn_str = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
     return create_engine(conn_str)
