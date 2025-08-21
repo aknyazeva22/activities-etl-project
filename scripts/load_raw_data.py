@@ -14,11 +14,11 @@ TABLE_NAME = 'raw_degustation_data'
 SCHEMA = 'public'
 
 load_dotenv()
-
 # Load environment variables
+DB_PROVIDER = os.environ.get('DB_PROVIDER')
 DB_USER = os.environ.get('DB_USER')
 DB_PASSWORD = os.environ.get('DB_PASSWORD')
-POSTRES_SERVER_NAME = os.environ.get('POSTRES_SERVER_NAME')
+DB_HOST = "localhost" if DB_PROVIDER == "local" else None
 DB_PORT = os.environ.get('DB_PORT', '5432')
 DB_NAME = os.environ.get('DB_NAME')
 
@@ -26,14 +26,19 @@ def get_engine() -> Engine:
     """
     Build a SQLAlchemy Engine from terraform outputs.
     """
-    # get connection string from terraform outputs
-    tf_dir = determine_terraform_dir()
-    outputs = load_terraform_outputs(tf_dir)
+    if DB_PROVIDER == "azure":
+        # get connection string from terraform outputs
+        tf_dir = determine_terraform_dir()
+        outputs = load_terraform_outputs(tf_dir)
 
-    try:
-        connection_string = outputs["postgres_example_conn_str"]["value"]
-    except KeyError as missing:
-        sys.exit(f"[fatal] missing key in terraform outputs: {missing}")
+        try:
+            connection_string = outputs["postgres_example_conn_str"]["value"]
+        except KeyError as missing:
+            sys.exit(f"[fatal] missing key in terraform outputs: {missing}")
+    elif db_provider == "local":
+        connection_string = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+    else:
+        sys.exit(f"[fatal] provider type is not supported: {db_provider}")
 
     return create_engine(connection_string)
 
