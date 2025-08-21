@@ -1,3 +1,7 @@
+#####################
+# Resource group and network
+#####################
+
 provider "azurerm" {
   features {}
   subscription_id = var.subscription_id
@@ -9,29 +13,64 @@ resource "azurerm_resource_group" "main" {
   location = var.location
 }
 
-resource "azurerm_postgresql_flexible_server" "main" {
-  name                   = var.postgres_server_name
-  resource_group_name    = azurerm_resource_group.main.name
-  location               = azurerm_resource_group.main.location
-  administrator_login    = var.db_admin
-  administrator_password = var.db_password
-  version                = "13"
-  storage_mb             = 32768
-  sku_name               = "B_Standard_B1ms"
-  zone                   = "1"
-
-  backup_retention_days        = 7
-  geo_redundant_backup_enabled = false
+resource "azurerm_virtual_network" "vnet" {
+  name                = "vnet-pgvm"
+  address_space       = [var.vnet_cidr]
+  location            = var.location
+  resource_group_name = azurerm_resource_group.main.name
 }
 
-resource "azurerm_postgresql_flexible_server_firewall_rule" "allow_all" {
-  name             = "AllowAll"
-  server_id	   = azurerm_postgresql_flexible_server.main.id
-  start_ip_address = "0.0.0.0"
-  end_ip_address   = "255.255.255.255"
+resource "azurerm_subnet" "subnet" {
+  name                 = "snet-pgvm"
+  resource_group_name  = azurerm_resource_group.main.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = [var.subnet_cidr]
 }
 
-output "postgres_connection_string" {
-  value = "postgresql://${var.db_admin}:${var.db_password}@${azurerm_postgresql_flexible_server.main.name}.postgres.database.azure.com:5432/postgres"
-  sensitive = true
+#####################
+# Cloud-init: install & configure Postgres
+#####################
+locals {
+  cloud_init_rendered = templatefile("${path.module}/cloud-init-postgres.yml", {
+    ADMIN_USERNAME = var.host_admin
+    DB_USER        = var.db_admin
+    DB_PASSWORD    = var.db_password
+    DB_NAME        = var.db_name
+    DB_PORT        = var.db_port
+  })
+}
+
+#####################
+# VM
+#####################
+data "local_file" "sshkey" { filename = var.ssh_public_key_path }
+
+resource "azurerm_linux_virtual_machine" "vm" {
+  name                = var.vm_name
+  location            = var.location
+  resource_group_name = azurerm_resource_group.main.name
+  network_interface_ids = [azurerm_network_interface.nic.id]
+  size                = "Standard_B2s"
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  admin_username = var.host_admin
+
+  admin_ssh_key {
+    username   = var.host_admin
+    public_key = data.local_file.sshkey.content
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
+    version   = "latest"
+  }
+
+  # cloud-init
+  custom_data = base64encode(local.cloud_init_rendered)
 }
