@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from pandas import DataFrame
 from pathlib import Path
 from sqlalchemy.engine import Engine
+from utils import determine_terraform_dir, load_terraform_outputs
 
 
 CSV_PATH = 'data/degustations.csv'
@@ -23,16 +24,18 @@ DB_NAME = os.environ.get('DB_NAME')
 
 def get_engine() -> Engine:
     """
-    Build a SQLAlchemy Engine from environment variables.
+    Build a SQLAlchemy Engine from terraform outputs.
     """
-    # TODO: take server hostname from terraform outputs
-    db_host = f"{POSTRES_SERVER_NAME}.francecentral.cloudapp.azure.com"
-    print(db_host)
-    # activities-postgres-server.francecentral.cloudapp.azure.com
-    # Create connection string
-    conn_str = f'postgresql://{DB_USER}:{DB_PASSWORD}@{db_host}:{DB_PORT}/{DB_NAME}'
-    print(conn_str)
-    return create_engine(conn_str)
+    # get connection string from terraform outputs
+    tf_dir = determine_terraform_dir()
+    outputs = load_terraform_outputs(tf_dir)
+
+    try:
+        connection_string = outputs["postgres_example_conn_str"]["value"]
+    except KeyError as missing:
+        sys.exit(f"[fatal] missing key in terraform outputs: {missing}")
+
+    return create_engine(connection_string)
 
 def read_raw_data(csv_path: str) -> DataFrame:
     """
