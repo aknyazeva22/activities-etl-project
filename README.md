@@ -8,7 +8,7 @@ This project provisions a PostgreSQL server on Azure, loads raw data using Pytho
 
 This ELT pipeline includes:
 
-1. **Infrastructure provisioning** with Terraform (Azure PostgreSQL Flexible Server)
+1. **Infrastructure provisioning** with Terraform (PostgreSQL server on Azure VM)
 2. **Data loading** from a CSV file into the raw schema with a Python script
 3. **Data transformation** using dbt to build a cleaned table with degustation information
 4. **Pipeline orchestration** with Dagster
@@ -17,7 +17,7 @@ This ELT pipeline includes:
 
 ## Technologies Used
 
-- **Azure** (PostgreSQL Flexible Server)
+- **Azure** (VM with a PostgreSQL Server)
 - **Terraform** for IaC
 - **Python (pandas, sqlalchemy)** for raw data loading
 - **dbt (Data Build Tool)** for SQL-based transformations
@@ -48,10 +48,12 @@ This ELT pipeline includes:
 ├── scripts/ # Python scripts
 │    ├── create_postgresql_server.py
 │    ├── generate_profiles.py
-│    └── load_raw_data.py
+│    ├── load_raw_data.py
+│    └── utils.py
 ├── setup.py
 └── terraform/ # Terraform config for Azure infrastructure
      ├── main.tf
+     ├── nic.tf
      ├── outputs.tf
      ├── terraform_tfvars_template.txt
      └── variables.tf
