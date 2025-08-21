@@ -1,9 +1,13 @@
-output "postgres_server" {
-  value = azurerm_postgresql_flexible_server.main.name
+#####################
+# Outputs
+#####################
+output "db_host" {
+  value = azurerm_public_ip.pip.ip_address
+  description = "Host for PostgreSQL connection"
 }
 
-output "db_host" {
-  value = azurerm_postgresql_flexible_server.main.fqdn
+output "postgres_port" {
+  value = var.db_port
 }
 
 output "db_user" {
@@ -17,4 +21,10 @@ output "db_password" {
 
 output "db_name" {
   value = "postgres"
+}
+
+output "postgres_example_conn_str" {
+  value       = "postgresql://${var.db_admin}:${var.db_password}@${azurerm_public_ip.pip.ip_address}:${var.db_port}/${var.db_name}"
+  description = "Connection string"
+  sensitive   = true
 }
