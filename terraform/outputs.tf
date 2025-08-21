@@ -1,12 +1,17 @@
 #####################
 # Outputs
 #####################
-output "db_host" {
-  value = azurerm_public_ip.pip.ip_address
-  description = "Host for PostgreSQL connection"
+output "db_server" {
+  value = azurerm_public_ip.pip.fqdn
+  description = "Hostname for PostgreSQL connection"
 }
 
-output "postgres_port" {
+output "db_host" {
+  value = azurerm_public_ip.pip.ip_address
+  description = "Host IP for PostgreSQL connection"
+}
+
+output "db_port" {
   value = var.db_port
 }
 

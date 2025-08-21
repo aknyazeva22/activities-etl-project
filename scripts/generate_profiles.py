@@ -27,6 +27,7 @@ def build_profile(outputs: Dict[str, Any]) -> str:
     """Return the YAML string for dbt profiles.yml."""
     try:
         host = outputs["db_host"]["value"]
+        port = outputs["db_port"]["value"]
         user = outputs["db_user"]["value"]
         password = outputs["db_password"]["value"]
         dbname = outputs["db_name"]["value"]
@@ -41,7 +42,7 @@ def build_profile(outputs: Dict[str, Any]) -> str:
       host: {host}
       user: {user}
       password: {password}
-      port: 5432
+      port: {port}
       dbname: {dbname}
       schema: public
       threads: 1

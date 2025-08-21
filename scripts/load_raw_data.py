@@ -14,19 +14,24 @@ SCHEMA = 'public'
 
 load_dotenv()
 
+# Load environment variables
+DB_USER = os.environ.get('DB_USER')
+DB_PASSWORD = os.environ.get('DB_PASSWORD')
+POSTRES_SERVER_NAME = os.environ.get('POSTRES_SERVER_NAME')
+DB_PORT = os.environ.get('DB_PORT', '5432')
+DB_NAME = os.environ.get('DB_NAME')
+
 def get_engine() -> Engine:
     """
     Build a SQLAlchemy Engine from environment variables.
     """
-    # Load environment variables
-    DB_USER = os.environ.get('DB_USER')
-    DB_PASSWORD = os.environ.get('DB_PASSWORD')
-    DB_HOST = os.environ.get('DB_HOST')
-    DB_PORT = os.environ.get('DB_PORT', '5432')
-    DB_NAME = os.environ.get('DB_NAME')
-
+    # TODO: take server hostname from terraform outputs
+    db_host = f"{POSTRES_SERVER_NAME}.francecentral.cloudapp.azure.com"
+    print(db_host)
+    # activities-postgres-server.francecentral.cloudapp.azure.com
     # Create connection string
-    conn_str = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+    conn_str = f'postgresql://{DB_USER}:{DB_PASSWORD}@{db_host}:{DB_PORT}/{DB_NAME}'
+    print(conn_str)
     return create_engine(conn_str)
 
 def read_raw_data(csv_path: str) -> DataFrame:
