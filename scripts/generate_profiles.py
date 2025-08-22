@@ -20,7 +20,7 @@ def profile_parameters_from_terraform(outputs: Dict[str, Any]) -> Dict[str, Any]
         parameters_dict["user"] = outputs["db_user"]["value"]
         parameters_dict["password"] = outputs["db_password"]["value"]
         parameters_dict["dbname"] = outputs["db_name"]["value"]
-        parameters_dict["schema"] = os.environ.get('DB_PORT', 'public')
+        parameters_dict["schema"] = os.environ.get('DB_SCHEMA', 'public')
     except KeyError as missing:
         sys.exit(f"[fatal] missing key in terraform outputs: {missing}")
 
@@ -37,7 +37,7 @@ def profile_parameters_from_env() -> Dict[str, Any]:
         parameters_dict["user"] = os.environ.get('DB_USER')
         parameters_dict["password"] = os.environ.get('DB_PASSWORD')
         parameters_dict["dbname"] = os.environ.get('DB_NAME')
-        parameters_dict["schema"] = os.environ.get('DB_PORT', 'public')
+        parameters_dict["schema"] = os.environ.get('DB_SCHEMA', 'public')
     except KeyError as missing:
         sys.exit(f"[fatal] missing key in .env: {missing}")
 
