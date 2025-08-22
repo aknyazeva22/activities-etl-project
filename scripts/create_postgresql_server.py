@@ -1,8 +1,8 @@
-import os
 import pathlib
 import subprocess
 from typing import List
 from pathlib import Path
+from os import environ
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -10,22 +10,24 @@ load_dotenv()
 TERRAFORM_DIR = pathlib.Path(__file__).parents[1] / "terraform"
 STATE_FILE    = "terraform.tfvars"
 
-AZURE_SUBSCRIPTION_ID = os.environ['AZURE_SUBSCRIPTION_ID']
-AZURE_RESOURCE_GROUP_NAME = os.environ['AZURE_RESOURCE_GROUP_NAME']
-AZURE_LOCATION = os.environ['AZURE_LOCATION']
-POSTRES_SERVER_NAME = os.environ['POSTRES_SERVER_NAME']
-DB_NAME = os.environ['DB_NAME']
-DB_USER = os.environ['DB_USER']
-DB_PASSWORD = os.environ['DB_PASSWORD']
-
 # Format terraform config
 TERRAFORM_CONF = f"""
-subscription_id = "{AZURE_SUBSCRIPTION_ID}"
-resource_group_name = "{AZURE_RESOURCE_GROUP_NAME}"
-location = "{AZURE_LOCATION}"
-postgres_server_name = "{POSTRES_SERVER_NAME}"
-db_admin = "{DB_USER}"
-db_password = "{DB_PASSWORD}"
+allowed_db_cidr = "{environ['ALLOWED_IP']}"
+db_admin = "{environ['DB_USER']}"
+db_name = "{environ['DB_NAME']}"
+db_password = "{environ['DB_PASSWORD']}"
+db_port = "{environ['DB_PORT']}"
+host_admin = "{environ['HOST_ADMIN']}"
+location = "{environ['AZURE_LOCATION']}"
+pgdata = "{environ['PGDATA_DIR']}"
+postgres_server_name = "{environ['POSTRES_SERVER_NAME']}"
+postgres_version = "{environ['POSTGRES_VERSION']}"
+resource_group_name = "{environ['AZURE_RESOURCE_GROUP_NAME']}"
+ssh_public_key_path = "{environ['SSH_KEY_PATH']}"
+subnet_cidr = "{environ['SUBNET_CIDR']}"
+subscription_id = "{environ['AZURE_SUBSCRIPTION_ID']}"
+vm_name = "{environ['VM_NAME']}"
+vnet_cidr = "{environ['VNET_CIDR']}"
 """
 
 def _tf(cmd: List[str]) -> None:
