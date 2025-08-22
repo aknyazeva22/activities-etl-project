@@ -5,7 +5,7 @@ import subprocess
 import sys
 from typing import Any, Dict
 from dotenv import load_dotenv
-from utils import determine_terraform_dir, load_terraform_outputs
+from scripts.utils import determine_terraform_dir, load_terraform_outputs
 
 load_dotenv()
 

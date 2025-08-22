@@ -2,12 +2,13 @@ import os
 import sys
 from typing import Optional
 import pandas as pd
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import create_engine, inspect, text
+from sqlalchemy.schema import CreateSchema
 from dotenv import load_dotenv
 from pandas import DataFrame
 from pathlib import Path
 from sqlalchemy.engine import Engine
-from utils import determine_terraform_dir, load_terraform_outputs
+from scripts.utils import determine_terraform_dir, load_terraform_outputs
 
 
 CSV_PATH = 'data/degustations.csv'
@@ -43,6 +44,21 @@ def get_engine() -> Engine:
 
     return create_engine(connection_string)
 
+def ensure_pg_schema(engine: Engine, schema: str) -> None:
+    """Postgres-only: create schema if missing."""
+    with engine.begin() as conn:
+        # conn.execute(text(f'CREATE SCHEMA IF NOT EXISTS "{schema}"'))
+        ddl = CreateSchema(schema, if_not_exists=True)
+        conn.execute(ddl)
+        if schema not in inspect(conn).get_schema_names():
+            raise RuntimeError(f"Failed to verify schema '{schema}'")
+        # try:
+        #     ddl = CreateSchema(schema, if_not_exists=True)
+        #     conn.execute(ddl)
+    return
+
+
+
 def read_raw_data(csv_path: str) -> DataFrame:
     """
     Read a semicolon-delimited CSV into a pandas DataFrame.
@@ -64,6 +80,13 @@ def push_to_table(
     """
     Append a pandas DataFrame to a SQL table.
     """
+    # Ensure schema exists
+    if schema is None:
+        schema = inspect(engine).default_schema
+    else:
+        if not inspect(engine).has_schema(schema):
+            ensure_pg_schema(engine, schema)
+
     if df.empty:
         raise ValueError("Nothing to write: DataFrame is empty.")
 
