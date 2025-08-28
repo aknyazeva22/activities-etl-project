@@ -2,13 +2,18 @@
 # Outputs
 #####################
 output "db_server" {
-  value = azurerm_public_ip.pip.fqdn
+  value = azurerm_public_ip.bastion_pip.fqdn
   description = "Hostname for PostgreSQL connection"
 }
 
 output "db_host" {
-  value = azurerm_public_ip.pip.ip_address
-  description = "Host IP for PostgreSQL connection"
+  value = "127.0.0.1"
+  description = "Host IP for PostgreSQL connection (local)"
+}
+
+output "bastion_host" {
+  value = azurerm_public_ip.bastion_pip.ip_address
+  description = "Host IP for Bastion connection"
 }
 
 output "db_port" {
@@ -29,7 +34,7 @@ output "db_name" {
 }
 
 output "postgres_example_conn_str" {
-  value       = "postgresql://${var.db_admin}:${var.db_password}@${azurerm_public_ip.pip.ip_address}:${var.db_port}/${var.db_name}"
+  value       = "postgresql://${var.db_admin}:${var.db_password}@127.0.0.1:${var.db_port}/${var.db_name}"
   description = "Connection string"
   sensitive   = true
 }
