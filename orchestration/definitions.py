@@ -1,7 +1,7 @@
 from pathlib import Path
 from dagster import AssetExecutionContext, Definitions, load_assets_from_modules
 from dagster_dbt import DbtCliResource, DbtProject, dbt_assets
-from orchestration import assets, jobs
+from orchestration import assets, jobs, resources
 
 all_assets = load_assets_from_modules([assets])
 
@@ -9,16 +9,9 @@ all_assets = load_assets_from_modules([assets])
 dbt_project_directory = Path(__file__).absolute().parent.parent / "dbt" / "dbt_activities"
 dbt_project = DbtProject(project_dir=dbt_project_directory)
 
-resources = {
-    "dbt": DbtCliResource(
-        project_dir="dbt/dbt_activities",
-    )
-}
-
 # Compiles the dbt project & allow Dagster to build an asset graph
 dbt_project.prepare_if_dev()
 
-# Yields Dagster events streamed from the dbt CLI
 @dbt_assets(manifest=dbt_project.manifest_path)
 def dbt_models(context: AssetExecutionContext, dbt: DbtCliResource):
     yield from dbt.cli(["build"], context=context).stream()
@@ -30,8 +23,14 @@ defs = Definitions(
         assets.raw_data,
         assets.raw_degustation_data,
     ],
-    resources=resources,
+    resources={
+        "dbt": DbtCliResource(
+            project_dir="dbt/dbt_activities",
+        ),
+        "bastion": resources.bastion_tunnel.BastionTunnelResource,
+    },
     jobs=[
         jobs.provision_infra,
+        jobs.tunnel_then_query,
     ],
 )

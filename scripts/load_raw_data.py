@@ -18,49 +18,21 @@ TABLE_NAME = 'raw_degustation_data'
 load_dotenv()
 # Load environment variables
 DB_PROVIDER = os.environ.get('DB_PROVIDER')
+AZURE_SUBSCRIPTION_ID = os.environ.get('AZURE_SUBSCRIPTION_ID') if DB_PROVIDER == "azure" else None
 AZURE_RESOURCE_GROUP_NAME = os.environ.get('AZURE_RESOURCE_GROUP_NAME') if DB_PROVIDER == "azure" else None
 VM_NAME = os.environ.get('VM_NAME') if DB_PROVIDER == "azure" else None
 DB_USER = os.environ.get('DB_USER')
 DB_PASSWORD = os.environ.get('DB_PASSWORD')
-DB_HOST = "localhost" # we use localhost for azure also, since we use tunnel
-DB_PORT = os.environ.get('DB_PORT', '5432')
+DB_HOST = "127.0.0.1" # "localhost" # we use localhost for azure also, since we use tunnel
+DB_PORT = 15435 # os.environ.get('DB_PORT', '5432')
 DB_NAME = os.environ.get('DB_NAME')
 SCHEMA = os.environ.get('DB_SCHEMA', 'public')
 
 def get_engine() -> Engine:
     """
-    Build a SQLAlchemy Engine from terraform outputs.
+    Build a SQLAlchemy Engine from environment variables.
     """
-    if DB_PROVIDER == "azure":
-        # get connection string from terraform outputs
-        tf_dir = determine_terraform_dir()
-        outputs = load_terraform_outputs(tf_dir)
-        try:
-            connection_string = outputs["postgres_example_conn_str"]["value"]
-        except KeyError as missing:
-            sys.exit(f"[fatal] missing key in terraform outputs: {missing}")
-
-        try:
-            proc = subprocess.Popen([
-                "az","network","bastion","tunnel",
-                "--name","bastion-host",
-                "--resource-group", AZURE_RESOURCE_GROUP_NAME,
-                f"--target-resource-id","/subscriptions/<sub>/resourceGroups/{AZURE_RESOURCE_GROUP_NAME}/providers/Microsoft.Compute/virtualMachines/{VM_NAME}",
-                "--resource-port", "5432","--port", str(DB_PORT)
-            ])
-            # Wait until local port is open
-            for _ in range(60):
-                with socket.socket() as s:
-                    if s.connect_ex((DB_HOST, int(DB_PORT))) == 0:
-                        break
-                time.sleep(1)
-        except Exception as tunnel_error:
-            sys.exit(f"[fatal] cannot open tunnel: {tunnel_error}")
-
-    elif DB_PROVIDER == "local":
-        connection_string = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
-    else:
-        sys.exit(f"[fatal] provider type is not supported: {DB_PROVIDER}")
+    connection_string = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 
     return create_engine(connection_string)
 
