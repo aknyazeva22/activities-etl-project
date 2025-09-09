@@ -9,7 +9,6 @@ from dotenv import load_dotenv
 from pandas import DataFrame
 from pathlib import Path
 from sqlalchemy.engine import Engine
-from scripts.utils import determine_terraform_dir, load_terraform_outputs
 
 
 CSV_PATH = 'data/degustations.csv'
@@ -24,7 +23,7 @@ VM_NAME = os.environ.get('VM_NAME') if DB_PROVIDER == "azure" else None
 DB_USER = os.environ.get('DB_USER')
 DB_PASSWORD = os.environ.get('DB_PASSWORD')
 DB_HOST = "127.0.0.1" # "localhost" # we use localhost for azure also, since we use tunnel
-DB_PORT = 15435 # os.environ.get('DB_PORT', '5432')
+DB_PORT = os.environ.get('LOCAL_PORT', '5432') if DB_PROVIDER == "azure" else os.environ.get('DB_PORT', '5432')
 DB_NAME = os.environ.get('DB_NAME')
 SCHEMA = os.environ.get('DB_SCHEMA', 'public')
 
@@ -44,12 +43,12 @@ def ensure_pg_schema(engine: Engine, schema: str) -> None:
         conn.execute(ddl)
         if schema not in inspect(conn).get_schema_names():
             raise RuntimeError(f"Failed to verify schema '{schema}'")
-        # try:
-        #     ddl = CreateSchema(schema, if_not_exists=True)
-        #     conn.execute(ddl)
+        try:
+            ddl = CreateSchema(schema, if_not_exists=True)
+            conn.execute(ddl)
+        except Exception as e:
+            raise RuntimeError(f"Failed to create schema '{schema}': {e}")
     return
-
-
 
 def read_raw_data(csv_path: str) -> DataFrame:
     """

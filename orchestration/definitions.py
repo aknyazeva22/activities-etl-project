@@ -31,6 +31,8 @@ defs = Definitions(
     },
     jobs=[
         jobs.provision_infra,
-        jobs.tunnel_then_query,
+        jobs.start_tunnel,
+        jobs.assert_tunnel,
+        jobs.stop_tunnel,
     ],
 )
