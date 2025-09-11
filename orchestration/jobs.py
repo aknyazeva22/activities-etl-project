@@ -45,7 +45,8 @@ def start_tunnel_op(context):
     # if not in azure_tunnel mode, skip
     mode = os.getenv("DB_PROVIDER", "local")
     if mode != "azure_tunnel":
-        raise SkipReason(f"Skipping tunnel because MODE={mode}")
+        context.log.info(f"Skipping tunnel because MODE={mode}")
+        return
     
     port = context.op_config["port"]  # port could be set in dagster UI
     tunnel_envs = {
@@ -84,7 +85,8 @@ def assert_tunnel_op(context):
     # if not in azure_tunnel mode, skip
     mode = os.getenv("DB_PROVIDER", "local")
     if mode != "azure_tunnel":
-        raise SkipReason(f"Skipping tunnel because MODE={mode}")
+        context.log.info(f"Skipping tunnel because MODE={mode}")
+        return
     
     port = context.op_config["port"]  # port could be set in dagster UI
     try:
@@ -94,11 +96,12 @@ def assert_tunnel_op(context):
         raise RuntimeError("Tunnel not running. Start it first.")
 
 @op
-def stop_tunnel_op(_):
+def stop_tunnel_op(context):
     # if not in azure_tunnel mode, skip
     mode = os.getenv("DB_PROVIDER", "local")
     if mode != "azure_tunnel":
-        raise SkipReason(f"Skipping tunnel because MODE={mode}")
+        context.log.info(f"Skipping tunnel because MODE={mode}")
+        return
 
     subprocess.run(["scripts/tunnelctl.sh","stop"], check=True, capture_output=True, text=True)
 
