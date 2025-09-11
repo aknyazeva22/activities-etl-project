@@ -2,14 +2,14 @@ version: 2
 
 sources:
   - name: raw
-    database: postgres
-    schema: public
+    database: "{{ target.dbname }}"
+    schema: "{{ target.schema }}"
     description: Raw data from degustation tourism dataset
     tables:
       - name: raw_degustation_data
-        meta:                               # This metadata:
-          dagster:                          # Tells dbt where this model's source data is, and
-            asset_key: ["raw_degustation_data"]    # Tells Dagster which asset represents the source data
+        meta:
+          dagster:
+            asset_key: ["raw_degustation_data"]
         columns:
         - name: "Nom de l'offre touristique"
           description: Name of the tourist offer

@@ -9,19 +9,31 @@ all_assets = load_assets_from_modules([assets])
 dbt_project_directory = Path(__file__).absolute().parent.parent / "dbt" / "dbt_activities"
 dbt_project = DbtProject(project_dir=dbt_project_directory)
 
-resources = {
-    "dbt": DbtCliResource(
-        project_dir="dbt/dbt_activities",
-    )
-}
+
 
 # Compiles the dbt project & allow Dagster to build an asset graph
 dbt_project.prepare_if_dev()
 
+dbt_cli = DbtCliResource(
+    project_dir=str(dbt_project_directory),
+    profiles_dir=str(dbt_project_directory),
+    target="dev",
+)
+
 # Yields Dagster events streamed from the dbt CLI
 @dbt_assets(manifest=dbt_project.manifest_path)
 def dbt_models(context: AssetExecutionContext, dbt: DbtCliResource):
+    args = [
+        "build",
+        "--project-dir", str(dbt_project_directory),
+        "--profiles-dir", str(dbt_project_directory),
+        "--target", "dev",
+    ]
     yield from dbt.cli(["build"], context=context).stream()
+
+resources = {
+    "dbt": dbt_cli
+}
 
 defs = Definitions(
     assets=[
