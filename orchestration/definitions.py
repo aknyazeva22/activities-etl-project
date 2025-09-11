@@ -1,15 +1,13 @@
 from pathlib import Path
 from dagster import AssetExecutionContext, Definitions, load_assets_from_modules
 from dagster_dbt import DbtCliResource, DbtProject, dbt_assets
-from orchestration import assets, jobs
+from orchestration import assets, jobs, resources
 
 all_assets = load_assets_from_modules([assets])
 
 # Points to the dbt project path
 dbt_project_directory = Path(__file__).absolute().parent.parent / "dbt" / "dbt_activities"
 dbt_project = DbtProject(project_dir=dbt_project_directory)
-
-
 
 # Compiles the dbt project & allow Dagster to build an asset graph
 dbt_project.prepare_if_dev()
@@ -29,11 +27,7 @@ def dbt_models(context: AssetExecutionContext, dbt: DbtCliResource):
         "--profiles-dir", str(dbt_project_directory),
         "--target", "dev",
     ]
-    yield from dbt.cli(["build"], context=context).stream()
-
-resources = {
-    "dbt": dbt_cli
-}
+    yield from dbt.cli(args, context=context).stream()
 
 defs = Definitions(
     assets=[
@@ -42,8 +36,14 @@ defs = Definitions(
         assets.raw_data,
         assets.raw_degustation_data,
     ],
-    resources=resources,
+    resources={
+        "dbt": dbt_cli,
+        "bastion": resources.bastion_tunnel.BastionTunnelResource,
+    },
     jobs=[
         jobs.provision_infra,
+        jobs.start_tunnel,
+        jobs.assert_tunnel,
+        jobs.stop_tunnel,
     ],
 )

@@ -58,11 +58,6 @@ variable "ssh_public_key_path" {
   default = "~/.ssh/id_rsa.pub"
 }
 
-variable "subnet_cidr" {
-  type    = string
-  default = "10.50.1.0/24"
-}
-
 variable "subscription_id" {
   type    = string
   sensitive = true
@@ -76,4 +71,14 @@ variable "vm_name" {
 variable "vnet_cidr" {
   type    = string
   default = "10.50.0.0/16"
+}
+
+variable "internal_subnet_cidr" {
+  type        = list(string)
+  default     = ["10.50.1.0/24"]
+}
+
+variable "bastion_subnet_cidr" {
+  type        = list(string)
+  default     = ["10.50.254.0/24"]
 }
