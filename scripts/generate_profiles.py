@@ -26,7 +26,7 @@ def profile_parameters_from_terraform(outputs: Dict[str, Any]) -> Dict[str, Any]
 
     return parameters_dict
 
-def profile_parameters_from_env() -> Dict[str, Any]:
+def profile_parameters_local() -> Dict[str, Any]:
     """Return the dict with connection parameters for dbt profiles.yml
        from environment variables
     """
@@ -34,6 +34,23 @@ def profile_parameters_from_env() -> Dict[str, Any]:
     try:
         parameters_dict["host"] = "localhost"
         parameters_dict["port"] = os.environ.get('DB_PORT', '5432')
+        parameters_dict["user"] = os.environ.get('DB_USER')
+        parameters_dict["password"] = os.environ.get('DB_PASSWORD')
+        parameters_dict["dbname"] = os.environ.get('DB_NAME')
+        parameters_dict["schema"] = os.environ.get('DB_SCHEMA', 'public')
+    except KeyError as missing:
+        sys.exit(f"[fatal] missing key in .env: {missing}")
+
+    return parameters_dict
+
+def profile_parameters_azure_tunnel() -> Dict[str, Any]:
+    """Return the dict with connection parameters for dbt profiles.yml
+       from environment variables
+    """
+    parameters_dict = dict()
+    try:
+        parameters_dict["host"] = "127.0.0.1"
+        parameters_dict["port"] = os.environ.get('LOCAL_PORT', '5432')
         parameters_dict["user"] = os.environ.get('DB_USER')
         parameters_dict["password"] = os.environ.get('DB_PASSWORD')
         parameters_dict["dbname"] = os.environ.get('DB_NAME')
@@ -73,7 +90,9 @@ def main() -> None:
         outputs = load_terraform_outputs(tf_dir)
         connection_parameters = profile_parameters_from_terraform(outputs)
     elif db_provider == "local":
-        connection_parameters = profile_parameters_from_env()
+        connection_parameters = profile_parameters_local()
+    elif db_provider == "azure_tunnel":
+        connection_parameters = profile_parameters_azure_tunnel()
     else:
         sys.exit(f"[fatal] provider type is not supported: {db_provider}")
 
