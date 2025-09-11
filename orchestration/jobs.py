@@ -3,7 +3,7 @@ import time
 import runpy
 import socket
 import subprocess
-from dagster import op, job, OpExecutionContext
+from dagster import op, job, SkipReason
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 
@@ -42,6 +42,11 @@ def wait_for_port(host, port, timeout=30):
 
 @op(config_schema={"port": int})
 def start_tunnel_op(context):
+    # if not in azure_tunnel mode, skip
+    mode = os.getenv("DB_PROVIDER", "local")
+    if mode != "azure_tunnel":
+        raise SkipReason(f"Skipping tunnel because MODE={mode}")
+    
     port = context.op_config["port"]  # port could be set in dagster UI
     tunnel_envs = {
         **os.environ,
@@ -76,6 +81,11 @@ def start_tunnel_op(context):
 
 @op(config_schema={"port": int})
 def assert_tunnel_op(context):
+    # if not in azure_tunnel mode, skip
+    mode = os.getenv("DB_PROVIDER", "local")
+    if mode != "azure_tunnel":
+        raise SkipReason(f"Skipping tunnel because MODE={mode}")
+    
     port = context.op_config["port"]  # port could be set in dagster UI
     try:
         wait_for_port("127.0.0.1", port, timeout=3)
@@ -85,6 +95,11 @@ def assert_tunnel_op(context):
 
 @op
 def stop_tunnel_op(_):
+    # if not in azure_tunnel mode, skip
+    mode = os.getenv("DB_PROVIDER", "local")
+    if mode != "azure_tunnel":
+        raise SkipReason(f"Skipping tunnel because MODE={mode}")
+
     subprocess.run(["scripts/tunnelctl.sh","stop"], check=True, capture_output=True, text=True)
 
 
