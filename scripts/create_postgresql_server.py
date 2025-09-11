@@ -7,7 +7,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-TERRAFORM_DIR = pathlib.Path(__file__).parents[1] / "terraform"
+DB_PROVIDER = environ.get('DB_PROVIDER')
+
+PROJECT_DIR   = pathlib.Path(__file__).parents[1]
+TERRAFORM_DIR = PROJECT_DIR / "terraform" if DB_PROVIDER == "azure" else PROJECT_DIR / "terraform_bastion" if DB_PROVIDER == "azure_tunnel" else None
 STATE_FILE    = "terraform.tfvars"
 
 # Format terraform config

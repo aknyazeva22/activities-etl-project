@@ -24,7 +24,7 @@ write_files:
           volumes:
             - /opt/postgres/data:/var/lib/postgresql/data
           ports:
-            - "5432:5432"
+            - "${DB_PORT}:5432"
           healthcheck:
             test: ["CMD", "pg_isready", "-U", "${DB_USER}"]
             interval: 10s
