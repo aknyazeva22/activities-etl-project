@@ -14,24 +14,17 @@ resource "azurerm_resource_group" "main" {
 }
 
 resource "azurerm_virtual_network" "vnet" {
-  name                = "vnet-pgvm"
+  name                = "vnet-pgvm-basic"
   address_space       = [var.vnet_cidr]
   location            = var.location
   resource_group_name = azurerm_resource_group.main.name
 }
 
 resource "azurerm_subnet" "subnet" {
-  name                 = "snet-pgvm"
+  name                 = "snet-pgvm-basic"
   resource_group_name  = azurerm_resource_group.main.name
   virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = var.internal_subnet_cidr
-}
-
-resource "azurerm_subnet" "bastion" {
-  name                 = "AzureBastionSubnet"
-  resource_group_name  = azurerm_resource_group.main.name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = var.bastion_subnet_cidr
+  address_prefixes     = [var.subnet_cidr]
 }
 
 #####################
@@ -80,35 +73,4 @@ resource "azurerm_linux_virtual_machine" "vm" {
 
   # cloud-init
   custom_data = base64encode(local.cloud_init_rendered)
-}
-
-
-#########################
-# Bastion Host + Public IP
-#########################
-resource "azurerm_public_ip" "bastion_pip" {
-  name                = "pip-bastion"
-  location            = var.location
-  resource_group_name = azurerm_resource_group.main.name
-  allocation_method   = "Static"
-  sku                 = "Standard"
-}
-
-resource "azurerm_bastion_host" "bastion" {
-  name                = "bastion-host"
-  location            = var.location
-  resource_group_name = azurerm_resource_group.main.name
-  sku                 = "Standard"
-  scale_units         = 2
-
-  ip_configuration {
-    name                 = "bastion-ipcfg"
-    subnet_id            = azurerm_subnet.bastion.id
-    public_ip_address_id = azurerm_public_ip.bastion_pip.id
-  }
-
-  # (Optional) Enable native client support
-
-  ip_connect_enabled     = true
-  tunneling_enabled      = true
 }
