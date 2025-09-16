@@ -1,7 +1,7 @@
 from pathlib import Path
 from dagster import AssetExecutionContext, Definitions, load_assets_from_modules
 from dagster_dbt import DbtCliResource, DbtProject, dbt_assets
-from orchestration import assets, jobs, resources
+from orchestration import assets, jobs
 
 all_assets = load_assets_from_modules([assets])
 
@@ -33,12 +33,11 @@ defs = Definitions(
     assets=[
         dbt_models,
         assets.dbt_profiles,
-        assets.raw_data,
-        assets.raw_degustation_data,
+        assets.download_degustation_csv,
+        assets.load_degustation_raw,
     ],
     resources={
         "dbt": dbt_cli,
-        "bastion": resources.bastion_tunnel.BastionTunnelResource,
     },
     jobs=[
         jobs.provision_infra,
