@@ -7,8 +7,6 @@ from dagster import op, job, SkipReason
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 
-from orchestration.resources.bastion_tunnel import BastionTunnelResource
-
 
 load_dotenv()
 
