@@ -1,6 +1,13 @@
 # ELT Project: Degustation Data Pipeline
 
-This project provisions a PostgreSQL server on Azure, loads raw data using Python, and transforms it using dbt into a cleaned, analytics-ready table.
+This project provisions a PostgreSQL server and builds a complete ELT pipeline:  
+- **Extract/Load**: raw data is ingested using Python.  
+- **Transform**: data is modeled and cleaned with dbt into analytics-ready tables.  
+
+The infrastructure can be set up in three modes:  
+- **local** – PostgreSQL running in a Docker container (via `docker compose`)  
+- **azure** – PostgreSQL provisioned directly on an Azure VM  
+- **azure_tunnel** – PostgreSQL on an Azure VM accessed securely through an Azure Bastion tunnel (provisioned with Terraform)
 
 ---
 
@@ -8,9 +15,14 @@ This project provisions a PostgreSQL server on Azure, loads raw data using Pytho
 
 This ELT pipeline includes:
 
-1. **Infrastructure provisioning** with Terraform (PostgreSQL server on Azure VM)
+1. **Infrastructure provisioning**  
+   - On Azure (`azure`, `azure_tunnel`) with Terraform  
+   - Locally (`local`) with a setup script
+
 2. **Data loading** from a CSV file into the raw schema with a Python script
+
 3. **Data transformation** using dbt to build a cleaned table with degustation information
+
 4. **Pipeline orchestration** with Dagster
 
 ---
@@ -18,41 +30,44 @@ This ELT pipeline includes:
 ## Technologies Used
 
 - **PostgreSQL** as the target database:
-  - **Option 1 (Cloud): VM with a PostgreSQL Server**, provisioned via Terraform (Infrastructure as Code)
-  - **Option 2 (Docker): PostgreSQL in Docker**, for local development without cloud resources
-- **Terraform** for infrastructure provisioning (Azure option)
-- **Python (pandas, sqlalchemy)** for raw data loading
-- **dbt (Data Build Tool)** for SQL-based transformations
+  - **Option 1 (Cloud – azure):** VM with a PostgreSQL Server, provisioned via Terraform  
+  - **Option 2 (Cloud – azure_tunnel):** VM with a PostgreSQL Server, accessed through Azure Bastion, provisioned via Terraform  
+  - **Option 3 (Local – local):** PostgreSQL in Docker for local development without cloud resources  
+
+- **Terraform** for infrastructure provisioning (`azure`, `azure_tunnel`)  
+- **Python (pandas, sqlalchemy)** for raw data loading  
+- **dbt (Data Build Tool)** for SQL-based transformations  
 - **Dagster** for orchestration and observability
 
 ---
 
 ## Choose Your Deployment Mode
 
-This project supports two modes depending on your environment and needs:
+This project supports three modes depending on your environment and needs:
 
-1. Azure + Terraform (Cloud)
-
-Provisions a PostgreSQL Flexible Server on Azure using Terraform.
-
-Best suited for production or team environments.
-
-Requires an active Azure subscription and credentials configured via az login.
-
-Add to your .env file `DB_PROVIDER=azure`
-
-2. Local Development (Docker)
-
-Spins up a PostgreSQL instance inside a Docker container.
-
-Ideal for development, testing, or cost-free experimentation.
-
-Requires only Docker and Docker Compose installed locally.
-
-Add to your .env file `DB_PROVIDER=local`
+1. **Azure (Cloud – `azure`)**  
+   Provisions a PostgreSQL server on an Azure VM using Terraform.  
+   Best suited for production or shared team environments.  
+   Requires an active Azure subscription and credentials configured via `az login`.  
+   Add to your `.env` file: `DB_PROVIDER=azure`
 
 
-Both modes are fully compatible with the rest of the stack (Python ingestion, dbt transformations, Dagster orchestration). You can switch between them by updating DB_PROVIDER in your .env file.
+2. **Azure with Bastion Tunnel (Cloud – `azure_tunnel`)**  
+    Provisions a PostgreSQL server on an Azure VM and connects through an Azure Bastion tunnel, managed by Terraform.  
+    Useful when direct access to the VM is restricted or must be secured via tunneling.  
+    Requires an active Azure subscription and credentials configured via `az login`.  
+    Add to your `.env` file: `DB_PROVIDER=azure_tunnel`
+
+
+3. **Local Development (Docker – `local`)**  
+    Spins up a PostgreSQL instance inside a Docker container.  
+    Ideal for development, testing, or cost-free experimentation.  
+    Requires Docker and Docker Compose installed locally.  
+    Add to your `.env` file: `DB_PROVIDER=local`
+
+
+All modes are fully compatible with the rest of the stack (Python ingestion, dbt transformations, Dagster orchestration).  
+You can switch between them by updating `DB_PROVIDER` in your `.env` file.
 
 ---
 
@@ -81,13 +96,22 @@ Both modes are fully compatible with the rest of the stack (Python ingestion, db
 │    ├── create_postgresql_server.py
 │    ├── generate_profiles.py
 │    ├── load_raw_data.py
+|    ├── tunnelctl.sh
 │    └── utils.py
 ├── setup.py
-└── terraform/ # Terraform config for Azure infrastructure
+├──terraform/ # Terraform config for Azure infrastructure (azure mode)
+│    ├── cloud-init-postgres.yml
+│    ├── main.tf
+│    ├── nic.tf
+│    ├── outputs.tf
+│    ├── terraform.tfvars.template
+│    └── variables.tf
+└── terraform/ # Terraform config for Azure infrastructure (azure mode)
+     ├── cloud-init-postgres.yml
      ├── main.tf
      ├── nic.tf
      ├── outputs.tf
-     ├── terraform_tfvars_template.txt
+     ├── terraform.tfvars.template
      └── variables.tf
 ```
 
@@ -98,16 +122,18 @@ Both modes are fully compatible with the rest of the stack (Python ingestion, db
 ```
 git clone https://github.com/aknyazeva22/activities-etl-project.git
 cd activities-etl-project
-cp env.template .env  # fill in secrets
+cp env.template .env  # fill in secrets and choose DB_PROVIDER (azure, azure_tunnel, or local)
 ```
+
+The provided `env.template` file lists all required environment variables. Use it as a guide when filling in your `.env`.
+
 
 ## Connect to Azure (Cloud)
 
-Before working with this repository, make sure you are authenticated to your Azure account.
+For `azure` and `azure_tunnel` modes, you must be authenticated to your Azure account.
 
-Open a terminal or command prompt.
-
-Run the following command:
+1. Open a terminal or command prompt.  
+2. Run the following command:
 
 ```
 az login
@@ -115,7 +141,7 @@ az login
 
 A browser window will open prompting you to sign in with your Azure credentials. Follow the on-screen instructions.
 
-If you have multiple subscriptions, you can set the active subscription after logging in using:
+If you have multiple subscriptions, set the active subscription after logging in:
 
 ```
 az account set --subscription "<subscription-name-or-id>"
@@ -125,7 +151,7 @@ Important: Also add your <subscription-name-or-id> to the .env file in this repo
 
 You must have the Azure CLI installed. If not, see [Install the Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) before proceeding.
 
-## Run Docker (Docker)
+## Run PostgreSQL Locally (Docker – `local`)
 
 If you prefer to use a local PostgreSQL instance instead of Azure, you can launch it with Docker.
 
@@ -173,7 +199,9 @@ docker compose down
 dagster dev
 ```
 
-## Run the provision_infra job
+## Run Infrastructure Jobs
+
+### Provision Infrastructure (azure, azure_tunnel)
 
 In the Dagster UI, select **Jobs -> `provision_infra` -> Launch**
 
@@ -185,8 +213,20 @@ dagster job execute -f dagster/jobs.py -j provision_infra
 
 That single run will:
 
-1. `terraform init / plan / apply` to spin up Azure PostgreSQL
+1. Run terraform init / plan / apply to spin up a PostgreSQL server on an Azure VM
+
 2. Make connection details available to downstream ops (dbt, Python ETL, etc.)
+
+This job is not applicable in local mode (where PostgreSQL runs in Docker).
+
+### Tunnel Management (azure_tunnel only)
+
+For azure_tunnel mode, additional jobs manage the Bastion tunnel.
+If launched in other modes, these jobs will simply log a “skipped” message.
+
+* start_tunnel – opens the Bastion tunnel
+* assert_tunnel – checks if the tunnel is up
+* stop_tunnel – closes the tunnel
 
 
 # ELT Pipeline Architecture
