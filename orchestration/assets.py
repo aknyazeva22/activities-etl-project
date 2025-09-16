@@ -14,16 +14,16 @@ def dbt_profiles(context: AssetExecutionContext) -> None:
 
 # Prepare raw data
 @asset(compute_kind="python")
-def raw_data(context: AssetExecutionContext) -> None:
+def download_degustation_csv(context: AssetExecutionContext) -> None:
     context.log.info("Running extract step")
-    runpy.run_module("scripts.download_raw_data", run_name="__main__")
+    runpy.run_module("scripts.download_degustation_csv", run_name="__main__")
 
 # Load raw data
 @asset(
-    deps=[raw_data, dbt_profiles],
+    deps=[download_degustation_csv, dbt_profiles],
     description="Load degustations.csv into PostgreSQL as a raw table.",
     compute_kind="python",
 )
-def raw_degustation_data(context: AssetExecutionContext) -> None:
+def load_degustation_raw(context: AssetExecutionContext) -> None:
     context.log.info("Running load step")
     runpy.run_module("scripts.load_raw_data", run_name="__main__")

@@ -94,6 +94,7 @@ You can switch between them by updating `DB_PROVIDER` in your `.env` file.
 ├── README.md
 ├── scripts/ # Python scripts
 │    ├── create_postgresql_server.py
+|    ├── download_degustation_csv.py
 │    ├── generate_profiles.py
 │    ├── load_raw_data.py
 |    ├── tunnelctl.sh
