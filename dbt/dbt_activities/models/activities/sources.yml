@@ -9,7 +9,7 @@ sources:
       - name: raw_degustation_data
         meta:
           dagster:
-            asset_key: ["load_degustation_raw"]
+            asset_key: ["degustations_raw_table"]
         columns:
         - name: "Nom de l'offre touristique"
           description: Name of the tourist offer
