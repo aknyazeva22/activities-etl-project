@@ -27,6 +27,42 @@ This ELT pipeline includes:
 
 ---
 
+## Project Motivation & Use Case
+
+This project demonstrates how to build an **ELT pipeline**
+for ingesting and modeling open tourist data related to
+the *Pays de la Loire* region in France, with a focus on
+degustation activities (wine tasting, local products, etc.).
+
+The data originates from the official regional open data portal:
+https://data.paysdelaloire.fr/
+
+The primary goals of this project are to:
+- Showcase a production-style ELT architecture using modern data tools
+- Transform raw CSV data into analytics-ready tables
+- Support both local development and cloud-based deployments
+- Provide a reliable foundation for downstream analytical and data-driven use cases
+
+While the current implementation focuses on degustation data,
+the pipeline is designed to be easily extended to other types of
+tourist activities published by the region.
+
+### Typical Use Cases
+
+The resulting PostgreSQL database can serve multiple purposes:
+- **Exploratory and analytical queries** by data analysts
+- **Business intelligence dashboards** (e.g. Power BI, Tableau)
+- **Feature engineering** for machine learning workflows
+- **Structured knowledge storage** for AI-powered applications
+
+In particular, the cleaned and modeled data can act as a
+trusted backend component for a **Retrieval-Augmented Generation (RAG) system**,
+where an AI agent queries structured tourism data to answer
+user questions, generate recommendations, or enrich natural
+language responses with factual, up-to-date regional information.
+
+---
+
 ## Technologies Used
 
 - **PostgreSQL** as the target database:
