@@ -77,6 +77,55 @@ language responses with factual, up-to-date regional information.
 
 ---
 
+## Data Model & Transformations
+
+The source dataset describes degustation-related tourist offers published on *Data.paysdelaloire.fr*, the open data platform of the Pays de la Loire Region.
+It contains descriptive, geographic, and categorical information about tourist degustation activities.
+
+The source columns can be broadly grouped into:
+- Identification
+- Location
+- Classification
+- Opening periods / seasonality
+- Descriptive text
+
+### Raw Layer (`raw` schema)
+
+The raw layer contains data ingested from the source CSV with minimal transformation. Its structure closely mirrors the source dataset.
+
+The source schema and column definitions can be found on the official platform: <https://data.paysdelaloire.fr/explore/dataset/234400034_070-010_offre-touristique-degustations-rpdl/information/>
+
+Added technical metadata columns:
+  - TODO
+
+---
+
+### Staging Layer (`staging` schema – dbt)
+
+The staging layer applies light, deterministic transformations to make the data easier to work with downstream.
+
+Current transformations include:
+    - Renaming columns to a consistent snake_case convention
+    - Translating column names from French to English (e.g. "N° de téléphone fixe" -> landline_number)
+
+Added columns:
+    - is_address_given: indicates whether at least one of the address-related fields (Adresse1, Adresse1Suite, Adresse partie 2, Adresse partie 3) is not null
+    - TODO
+
+Planned improvements (TODO):
+    - Add a column with a stable key for an activity
+    - Review explicit type casting (dates, booleans, numeric fields)
+    - Normalize categorical values where appropriate
+    - Explode repeated or packed fields (e.g. values separated by || or ;)
+
+---
+
+### Analytics Layer (`analytics` schema)
+
+TODO: The analytics layer will be organized around an activity-centric star schema designed for analytical querying.
+
+---
+
 ## Choose Your Deployment Mode
 
 This project supports three modes depending on your environment and needs:
