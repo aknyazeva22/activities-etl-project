@@ -175,7 +175,7 @@ models:
       - name: "departement"
         description: Administrative department
 
-  - name: stg_raw_degustation_data
+  - name: staging_degustation_data
     description: Raw staging model for the degustation tourism dataset
     columns:
       - name: offer_name

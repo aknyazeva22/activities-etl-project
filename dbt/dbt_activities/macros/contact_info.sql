@@ -1,6 +1,6 @@
 {% macro test_contact_info(model) %}
 SELECT *
-FROM {{ ref('stg_raw_degustation_data') }}
+FROM {{ ref('staging_degustation_data') }}
 WHERE address_line1 IS NULL
   AND address_line2 IS NULL
   AND address_line3 IS NULL
