@@ -1,6 +1,6 @@
 -- models/staging/stg_raw_degustation_data.sql
 
-{{ config(materialized='view') }}
+{{ config(materialized='table') }}
 
 with src as (
   SELECT
