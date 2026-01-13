@@ -360,5 +360,11 @@ models:
       - name: activity_type
         description: Types of offers proposed (e.g., tastings, visits, sales)
 
+      - name: activity_key
+        description: Unique identifier for the activity
+        tests:
+          - not_null
+          - unique
+
     tests:
       - contact_info
