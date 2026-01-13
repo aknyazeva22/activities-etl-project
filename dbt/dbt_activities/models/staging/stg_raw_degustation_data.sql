@@ -2,14 +2,15 @@
 
 {{ config(materialized='view') }}
 
-SELECT
+with src as (
+  SELECT
   "Nom de l'offre touristique" AS offer_name,
   "Type d'offre" AS offer_type,
   "Adresse1" AS address_line1,
   "Adresse1Suite" AS address_line2,
   "Adresse partie 2" AS address_line3,
   "Adresse partie 3" AS address_line4,
-  "Code postal" AS code_postal,
+  CAST("Code postal" AS {{ dbt.type_string() }}) AS postal_code,
   "Bureau distributeur de l'adresse postale" AS postal_office,
   "Commune du lieu de visite" AS city_name,
   "Cedex" AS cedex,
@@ -58,5 +59,31 @@ SELECT
       THEN TRUE
       ELSE FALSE
   END AS is_address_given
+
+  FROM {{ source('raw', 'raw_degustation_data') }}
+),
+normalized as (
+  select
+    *,
+    lower(trim(coalesce(offer_name, '')))       as offer_name_norm,
+    lower(trim(coalesce(address_line1, '')))    as address1_norm,
+    lower(trim(coalesce(postal_code, '')))      as postal_code_norm,
+    lower(trim(coalesce(city_name, '')))        as city_norm,
+    cast(round(latitude::numeric, 5) as text)   as lat_norm,
+    cast(round(longitude::numeric, 5) as text)  as lon_norm
+  from src
+)
+
+select
+  *,
+  {{ dbt_utils.generate_surrogate_key([
+      'offer_name_norm',
+      'address1_norm',
+      'postal_code_norm',
+      'city_norm',
+      'lat_norm',
+      'lon_norm'
+  ]) }} as activity_key
+from normalized
   
-FROM {{ source('raw', 'raw_degustation_data') }}
+
