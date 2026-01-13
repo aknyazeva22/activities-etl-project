@@ -80,11 +80,11 @@ def push_to_table(
     table_name: str,
     schema: Optional[str] = None,
     *,  # separates keyword parameters
-    if_exists: str = "append",
+    if_exists: str = "replace",
     index: bool = False,
 ) -> None:
     """
-    Append a pandas DataFrame to a SQL table.
+    Push a pandas DataFrame to a SQL table.
     """
     # Ensure schema exists
     if schema is None:
@@ -114,5 +114,5 @@ if __name__ == '__main__':
         engine=engine,
         table_name=TABLE_NAME,
         schema=SCHEMA,
-        if_exists="append"
+        if_exists="replace"
         )
