@@ -365,6 +365,3 @@ models:
         tests:
           - not_null
           - unique
-
-    tests:
-      - contact_info

@@ -61,6 +61,9 @@ with src as (
   END AS is_address_given
 
   FROM {{ source('raw', 'raw_degustation_data') }}
+  -- excludes activities with no contact info
+  WHERE NOT {{ macro_contact_info() }}
+
 ),
 normalized as (
   select
