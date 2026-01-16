@@ -5,7 +5,7 @@ WHERE address_line1 IS NULL
   AND address_line2 IS NULL
   AND address_line3 IS NULL
   AND address_line4 IS NULL
-  AND modile_phone_number IS NULL
+  AND mobile_phone_number IS NULL
   AND landline_number IS NULL
   AND email IS NULL
   AND website IS NULL
