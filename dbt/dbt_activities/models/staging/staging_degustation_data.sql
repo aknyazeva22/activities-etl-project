@@ -18,7 +18,7 @@ with src as (
   "Latitude" AS latitude,
   "Longitude" AS longitude,
   "Situation de l'offre" AS transport_tips,
-  "N° de téléphone mobile" AS modile_phone_number,
+  "N° de téléphone mobile" AS mobile_phone_number,
   "N° de téléphone fixe" AS landline_number,
   "N° de fax" AS fax,
   "Adresse e-Mail" AS email,

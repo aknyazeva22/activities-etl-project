@@ -226,7 +226,7 @@ models:
       - name: transport_tips
         description: Transport tips
 
-      - name: modile_phone_number
+      - name: mobile_phone_number
         description: Mobile phone number
 
       - name: landline_number
