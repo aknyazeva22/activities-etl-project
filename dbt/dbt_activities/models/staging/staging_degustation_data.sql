@@ -1,6 +1,11 @@
 -- models/staging/staging_degustation_data.sql
 
-{{ config(materialized='table') }}
+{{ config(
+    materialized = 'table',
+    post_hook = [
+        "alter table {{ this }} add constraint pk_stg_activities primary key (activity_key)"
+    ]
+) }}
 
 with src as (
   SELECT
