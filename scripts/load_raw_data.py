@@ -47,17 +47,14 @@ def get_engine() -> Engine:
 
 def ensure_pg_schema(engine: Engine, schema: str) -> None:
     """Postgres-only: create schema if missing."""
+    ddl = CreateSchema(schema, if_not_exists=True)
+
     with engine.begin() as conn:
-        # conn.execute(text(f'CREATE SCHEMA IF NOT EXISTS "{schema}"'))
-        ddl = CreateSchema(schema, if_not_exists=True)
-        conn.execute(ddl)
-        if schema not in inspect(conn).get_schema_names():
-            raise RuntimeError(f"Failed to verify schema '{schema}'")
         try:
-            ddl = CreateSchema(schema, if_not_exists=True)
             conn.execute(ddl)
         except Exception as e:
             raise RuntimeError(f"Failed to create schema '{schema}': {e}")
+
     return
 
 def read_raw_data(csv_path: str) -> DataFrame:
