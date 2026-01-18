@@ -168,6 +168,7 @@ You can switch between them by updating `DB_PROVIDER` in your `.env` file.
 │   └── jobs.py
 ├── dbt/ # dbt project directory
 | └── dbt_activities
+|    ├── packages.yml
 │    └── models/
 |        ├── activities
 |        |    ├── schema.yml
@@ -278,6 +279,16 @@ The password will be the value of `DB_PASSWORD` from your .env file.
 ```
 docker compose down
 ```
+
+## Install dbt dependencies
+
+This project depends on the `dbt_utils` package for reusable macros and tests. To install dependencies, run:
+
+```
+dbt deps
+
+```
+The package version is defined in `packages.yml`.
 
 ## Launch Dagster
 
