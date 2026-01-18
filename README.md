@@ -167,14 +167,16 @@ You can switch between them by updating `DB_PROVIDER` in your `.env` file.
 │   ├── definitions.py
 │   └── jobs.py
 ├── dbt/ # dbt project directory
-| └── dbt_activities
-|    ├── packages.yml
-│    └── models/
-|        ├── activities
-|        |    ├── schema.yml
-|        |    └── sources.yml
-|        └── staging
-|             └── stg_raw_degustation_data.sql
+|   └── dbt_activities
+│       ├── packages.yml
+│       ├── macros/
+│       │   └── macro_contact_info.sql
+│       └── models/
+│           ├── activities/
+│           │   ├── schema.yml
+│           │   └── sources.yml
+│           └── staging/
+│               └── stg_raw_degustation_data.sql
 ├── docker-compose.yml # Docker config for local PostgreSQL
 ├── pyproject.toml
 ├── README.md
