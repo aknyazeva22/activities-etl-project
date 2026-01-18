@@ -11,10 +11,6 @@ from pathlib import Path
 from sqlalchemy.engine import Engine
 from scripts.utils import determine_terraform_dir, load_terraform_outputs
 
-
-CSV_PATH = 'data/degustations.csv'
-TABLE_NAME = 'raw_degustation_data'
-
 load_dotenv()
 # Load environment variables
 DB_PROVIDER = os.environ.get('DB_PROVIDER')
@@ -26,7 +22,6 @@ DB_PASSWORD = os.environ.get('DB_PASSWORD')
 DB_HOST = "127.0.0.1" if DB_PROVIDER in ["local", "azure_tunnel"] else None  # for azure VM this is not needed, since we take connection string from terraform
 DB_PORT = os.environ.get('LOCAL_PORT', '5432') if DB_PROVIDER == "azure_tunnel" else os.environ.get('DB_PORT', '5432')
 DB_NAME = os.environ.get('DB_NAME')
-SCHEMA = os.environ.get('DB_SCHEMA', 'public')
 
 def get_engine() -> Engine:
     """
@@ -72,7 +67,7 @@ def read_raw_data(csv_path: str) -> DataFrame:
     path = Path(csv_path)
     if not path.is_file():
         raise FileNotFoundError(f"CSV file not found: {path}")
-    return pd.read_csv(CSV_PATH, sep=';')
+    return pd.read_csv(csv_path, sep=';')
 
 def push_to_table(
     df: DataFrame,
