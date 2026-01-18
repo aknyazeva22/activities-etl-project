@@ -176,7 +176,7 @@ You can switch between them by updating `DB_PROVIDER` in your `.env` file.
 │           │   ├── schema.yml
 │           │   └── sources.yml
 │           └── staging/
-│               └── stg_raw_degustation_data.sql
+│               └── staging_degustation_data.sql
 ├── docker-compose.yml # Docker config for local PostgreSQL
 ├── pyproject.toml
 ├── README.md
