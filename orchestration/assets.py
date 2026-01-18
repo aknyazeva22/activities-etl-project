@@ -3,6 +3,13 @@ import runpy
 from dagster import AssetExecutionContext, asset
 from dagster_dbt import dbt_assets
 
+from scripts.load_raw_data import get_engine, push_to_table, read_raw_data
+
+CSV_PATH = 'data/degustations.csv'
+TABLE_NAME = "raw_degustation_data"
+SCHEMA = os.environ.get('DB_SCHEMA', 'public')
+
+
 # Configure dbt
 @asset(
     description="Prepared dbt profiles from infra creation step.",
@@ -37,5 +44,14 @@ def degustations_raw_table(context: AssetExecutionContext) -> None:
     """
     Load degustations.csv into PostgreSQL as a raw table.
     """
+    df = read_raw_data(CSV_PATH)
     context.log.info("Running load step")
-    runpy.run_module("scripts.load_raw_data", run_name="__main__")
+    engine = get_engine()
+    push_to_table(
+        df=df,
+        engine=engine,
+        table_name=TABLE_NAME,
+        schema=SCHEMA,
+        if_exists="replace"
+        )
+

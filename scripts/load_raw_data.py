@@ -105,14 +105,3 @@ def push_to_table(
         method="multi",          # batch rows
     )
     print("CSV with raw data loaded into PostgreSQL successfully.")
-
-if __name__ == '__main__':
-    df = read_raw_data(CSV_PATH)
-    engine = get_engine()
-    push_to_table(
-        df=df,
-        engine=engine,
-        table_name=TABLE_NAME,
-        schema=SCHEMA,
-        if_exists="replace"
-        )
