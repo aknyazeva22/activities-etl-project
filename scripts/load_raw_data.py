@@ -4,7 +4,9 @@ from typing import Optional
 import pandas as pd
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.schema import CreateSchema
+from datetime import datetime, timezone
 from dotenv import load_dotenv
+from hashlib import sha256
 from pandas import DataFrame
 from pathlib import Path
 from sqlalchemy.engine import Engine
@@ -65,12 +67,50 @@ def read_raw_data(csv_path: str) -> DataFrame:
         raise FileNotFoundError(f"CSV file not found: {path}")
     return pd.read_csv(csv_path, sep=';')
 
+def add_technical_metadata(
+    df: DataFrame,
+    *,
+    ingestion_id: str,
+    ingested_at: Optional[datetime] = None,
+    source_file_name: str,
+    source_system: str,
+    source_row_number: Optional[int] = None,
+    source_hash: Optional[str] = None,
+) -> DataFrame:
+    """
+    Add technical metadata columns to the DataFrame.
+    """
+    out = df.copy()
+    if ingested_at is None:
+        ingested_at = datetime.now(timezone.utc)
+
+    if source_row_number is None:
+        source_row_number = out.index.astype("int64") + 1
+
+    if source_hash is None:
+        # add hash column for deduping
+        row_as_text = out.astype("string").fillna("").agg("|".join, axis=1)
+        source_hash = row_as_text.apply(lambda s: sha256(s.encode("utf-8")).hexdigest())
+
+    out["source_row_number"] = source_row_number
+    out["ingestion_id"] = ingestion_id
+    out["ingested_at"] = ingested_at
+    out["source_file_name"] = source_file_name
+    out["source_system"] = source_system
+    out["source_hash"] = source_hash
+
+    return out
+
+
 def push_to_table(
     df: DataFrame,
     engine: Engine,
     table_name: str,
+    *,
+    csv_path: str,
+    ingestion_id: str,
+    source_system: str,
     schema: Optional[str] = None,
-    *,  # separates keyword parameters
     if_exists: str = "replace",
     index: bool = False,
 ) -> None:
@@ -86,6 +126,14 @@ def push_to_table(
 
     if df.empty:
         raise ValueError("Nothing to write: DataFrame is empty.")
+
+    df = add_technical_metadata(
+        df,
+        ingestion_id=ingestion_id,
+        ingested_at=datetime.now(timezone.utc),
+        source_file_name=Path(csv_path).name,
+        source_system=source_system,
+    )
 
     df.to_sql(
         name=table_name,
