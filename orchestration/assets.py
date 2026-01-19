@@ -8,6 +8,7 @@ from scripts.load_raw_data import get_engine, push_to_table, read_raw_data
 CSV_PATH = 'data/degustations.csv'
 TABLE_NAME = "raw_degustation_data"
 SCHEMA = os.environ.get('DB_SCHEMA', 'public')
+SOURCE_SYSTEM = "degustations_csv"
 
 
 # Configure dbt
@@ -52,6 +53,9 @@ def degustations_raw_table(context: AssetExecutionContext) -> None:
         engine=engine,
         table_name=TABLE_NAME,
         schema=SCHEMA,
+        ingestion_id=context.run_id,
+        source_system=SOURCE_SYSTEM,
+        csv_path=CSV_PATH,
         if_exists="replace"
         )
 
