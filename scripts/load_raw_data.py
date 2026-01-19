@@ -2,8 +2,7 @@ import os
 import sys
 from typing import Optional
 import pandas as pd
-import subprocess, time, socket
-from sqlalchemy import create_engine, inspect, text
+from sqlalchemy import create_engine, inspect
 from sqlalchemy.schema import CreateSchema
 from dotenv import load_dotenv
 from pandas import DataFrame
