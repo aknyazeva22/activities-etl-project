@@ -1,18 +1,35 @@
 [project]
 name = "activities-etl-project"
 version = "0.1.0"
-description = "Add your description here"
+description = "ELT project for degustation activities"
 readme = "README.md"
 requires-python = ">=3.9,<3.13"
+
 dependencies = [
-    "dagster",
-    "dagster-cloud",
+    # Orchestration
+    "dagster>=1.7",
+    # DB + dataframe layer
+    "sqlalchemy>=2.0",
+    "psycopg[binary]>=3.1",
+    "pandas>=2.0",
+    # Settings
+    "pydantic-settings>=2.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "dagster-webserver",
-    "pytest",
+    "pytest>=7",
+]
+
+ui = [
+    "dagster-webserver>=1.7",
+]
+
+dbt = [
+    "dbt-core>=1.7",
+    "dbt-postgres>=1.7",
+    "dagster-dbt>=0.28.1",
+    "dbt-duckdb>=1.10.0",
 ]
 
 [build-system]

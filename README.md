@@ -216,6 +216,30 @@ cp env.template .env  # fill in secrets and choose DB_PROVIDER (azure, azure_tun
 
 The provided `env.template` file lists all required environment variables. Use it as a guide when filling in your `.env`.
 
+## Python Dependencies & uv
+
+This project uses uv for Python dependency management and virtual environments. All dependencies are declared in pyproject.toml and pinned in uv.lock. If you don’t have uv installed yet, [install it](https://docs.astral.sh/uv/getting-started/installation/).
+
+From the repository root, run:
+
+```
+uv venv
+uv sync
+```
+
+You can either activate the virtual environment manually:
+
+```
+source .venv/bin/activate
+```
+
+Or run commands directly via uv (recommended):
+
+```
+uv run dagster dev
+uv run pytest
+uv run dbt debug
+```
 
 ## Connect to Azure (Cloud)
 
@@ -282,20 +306,19 @@ The password will be the value of `DB_PASSWORD` from your .env file.
 docker compose down
 ```
 
-## Install dbt dependencies
+## Install dbt packages
 
-This project depends on the `dbt_utils` package for reusable macros and tests. To install dependencies, run:
+This project depends on the `dbt_utils` package for reusable macros and tests. To install dbt packages, run:
 
 ```
-dbt deps
-
+uv run dbt deps
 ```
 The package version is defined in `packages.yml`.
 
 ## Launch Dagster
 
 ```
-dagster dev
+uv run dagster dev
 ```
 
 ## Run Infrastructure Jobs
@@ -307,7 +330,7 @@ In the Dagster UI, select **Jobs -> `provision_infra` -> Launch**
 Or headless
 
 ```
-dagster job execute -f dagster/jobs.py -j provision_infra
+uv run dagster job execute -f dagster/jobs.py -j provision_infra
 ```
 
 That single run will:
