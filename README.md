@@ -305,15 +305,26 @@ The password will be the value of `DB_PASSWORD` from your .env file.
 ```
 docker compose down
 ```
+## Configure dbt
 
-## Install dbt packages
+### Create dbt profiles
 
-This project depends on the `dbt_utils` package for reusable macros and tests. To install dbt packages, run:
+Generate a `profiles.yml` file from environment variables.
+This file defines database connections and is not committed to the repository.
+
+
+```
+uv run python scripts/generate_profiles.py
+```
+
+### Install dbt packages
+This project uses dbt packages (e.g. `dbt_utils`) for reusable macros and tests.
+
+To install dbt packages defined in `packages.yml`, run:
 
 ```
 uv run dbt deps
 ```
-The package version is defined in `packages.yml`.
 
 ## Launch Dagster
 
