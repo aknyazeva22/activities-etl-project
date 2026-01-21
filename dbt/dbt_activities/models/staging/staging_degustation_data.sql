@@ -3,6 +3,7 @@
 {{ config(
     materialized = 'table',
     post_hook = [
+        "{{ macro_safe_drop_pk(this, 'pk_stg_activities') }}",
         "alter table {{ this }} add constraint pk_stg_activities primary key (activity_key)"
     ]
 ) }}
