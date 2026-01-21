@@ -1,5 +1,6 @@
-from pathlib import Path
 import sys
+from pathlib import Path
+
 import requests
 
 
@@ -13,7 +14,7 @@ def download_csv(url: str, destination: Path, chunk_size: int = 8192) -> None:
 
         with destination.open("wb") as f:
             for chunk in resp.iter_content(chunk_size):
-                if chunk:               # filter out keep-alive chunks
+                if chunk:  # filter out keep-alive chunks
                     f.write(chunk)
 
     print(f"Saved {destination.absolute()}")

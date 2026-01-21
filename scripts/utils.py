@@ -2,7 +2,8 @@ import json
 import pathlib
 import subprocess
 import sys
-from typing import Any, Dict
+from typing import Any
+
 
 def determine_terraform_dir() -> pathlib.Path:
     repo_root = pathlib.Path(__file__).resolve().parents[1]
@@ -16,7 +17,7 @@ def determine_terraform_dir() -> pathlib.Path:
     return tf_dir
 
 
-def load_terraform_outputs(tf_dir: pathlib.Path) -> Dict[str, Any]:
+def load_terraform_outputs(tf_dir: pathlib.Path) -> dict[str, Any]:
     """Run `terraform output -json` and return the parsed dict."""
     try:
         result = subprocess.run(

@@ -1,28 +1,38 @@
 import os
 import sys
-from typing import Optional
-import pandas as pd
-from sqlalchemy import create_engine, inspect
-from sqlalchemy.schema import CreateSchema
-from datetime import datetime, timezone
-from dotenv import load_dotenv
+from datetime import UTC, datetime
 from hashlib import sha256
-from pandas import DataFrame
 from pathlib import Path
+
+import pandas as pd
+from dotenv import load_dotenv
+from pandas import DataFrame
+from sqlalchemy import create_engine, inspect
 from sqlalchemy.engine import Engine
+from sqlalchemy.schema import CreateSchema
+
 from scripts.utils import determine_terraform_dir, load_terraform_outputs
 
 load_dotenv()
 # Load environment variables
-DB_PROVIDER = os.environ.get('DB_PROVIDER')
-AZURE_SUBSCRIPTION_ID = os.environ.get('AZURE_SUBSCRIPTION_ID') if DB_PROVIDER == "azure" else None
-AZURE_RESOURCE_GROUP_NAME = os.environ.get('AZURE_RESOURCE_GROUP_NAME') if DB_PROVIDER == "azure" else None
-VM_NAME = os.environ.get('VM_NAME') if DB_PROVIDER == "azure" else None
-DB_USER = os.environ.get('DB_USER')
-DB_PASSWORD = os.environ.get('DB_PASSWORD')
-DB_HOST = "127.0.0.1" if DB_PROVIDER in ["local", "azure_tunnel"] else None  # for azure VM this is not needed, since we take connection string from terraform
-DB_PORT = os.environ.get('LOCAL_PORT', '5432') if DB_PROVIDER == "azure_tunnel" else os.environ.get('DB_PORT', '5432')
-DB_NAME = os.environ.get('DB_NAME')
+DB_PROVIDER = os.environ.get("DB_PROVIDER")
+AZURE_SUBSCRIPTION_ID = os.environ.get("AZURE_SUBSCRIPTION_ID") if DB_PROVIDER == "azure" else None
+AZURE_RESOURCE_GROUP_NAME = (
+    os.environ.get("AZURE_RESOURCE_GROUP_NAME") if DB_PROVIDER == "azure" else None
+)
+VM_NAME = os.environ.get("VM_NAME") if DB_PROVIDER == "azure" else None
+DB_USER = os.environ.get("DB_USER")
+DB_PASSWORD = os.environ.get("DB_PASSWORD")
+DB_HOST = (
+    "127.0.0.1" if DB_PROVIDER in ["local", "azure_tunnel"] else None
+)  # for azure VM this is not needed, since we take connection string from terraform
+DB_PORT = (
+    os.environ.get("LOCAL_PORT", "5432")
+    if DB_PROVIDER == "azure_tunnel"
+    else os.environ.get("DB_PORT", "5432")
+)
+DB_NAME = os.environ.get("DB_NAME")
+
 
 def get_engine() -> Engine:
     """
@@ -39,12 +49,12 @@ def get_engine() -> Engine:
             sys.exit(f"[fatal] missing key in terraform outputs: {missing}")
 
     elif DB_PROVIDER in ["local", "azure_tunnel"]:
-        connection_string = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+        connection_string = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     else:
         sys.exit(f"[fatal] provider type is not supported: {DB_PROVIDER}")
 
-
     return create_engine(connection_string)
+
 
 def ensure_pg_schema(engine: Engine, schema: str) -> None:
     """Postgres-only: create schema if missing."""
@@ -54,9 +64,10 @@ def ensure_pg_schema(engine: Engine, schema: str) -> None:
         try:
             conn.execute(ddl)
         except Exception as e:
-            raise RuntimeError(f"Failed to create schema '{schema}': {e}")
+            raise RuntimeError(f"Failed to create schema '{schema}': {e}") from e
 
     return
+
 
 def read_raw_data(csv_path: str) -> DataFrame:
     """
@@ -65,24 +76,25 @@ def read_raw_data(csv_path: str) -> DataFrame:
     path = Path(csv_path)
     if not path.is_file():
         raise FileNotFoundError(f"CSV file not found: {path}")
-    return pd.read_csv(csv_path, sep=';')
+    return pd.read_csv(csv_path, sep=";")
+
 
 def add_technical_metadata(
     df: DataFrame,
     *,
     ingestion_id: str,
-    ingested_at: Optional[datetime] = None,
+    ingested_at: datetime | None = None,
     source_file_name: str,
     source_system: str,
-    source_row_number: Optional[int] = None,
-    source_hash: Optional[str] = None,
+    source_row_number: int | None = None,
+    source_hash: str | None = None,
 ) -> DataFrame:
     """
     Add technical metadata columns to the DataFrame.
     """
     out = df.copy()
     if ingested_at is None:
-        ingested_at = datetime.now(timezone.utc)
+        ingested_at = datetime.now(UTC)
 
     if source_row_number is None:
         source_row_number = out.index.astype("int64") + 1
@@ -110,7 +122,7 @@ def push_to_table(
     csv_path: str,
     ingestion_id: str,
     source_system: str,
-    schema: Optional[str] = None,
+    schema: str | None = None,
     if_exists: str = "replace",
     index: bool = False,
 ) -> None:
@@ -130,7 +142,7 @@ def push_to_table(
     df = add_technical_metadata(
         df,
         ingestion_id=ingestion_id,
-        ingested_at=datetime.now(timezone.utc),
+        ingested_at=datetime.now(UTC),
         source_file_name=Path(csv_path).name,
         source_system=source_system,
     )
@@ -141,6 +153,6 @@ def push_to_table(
         schema=schema,
         if_exists=if_exists,
         index=index,
-        method="multi",          # batch rows
+        method="multi",  # batch rows
     )
     print("CSV with raw data loaded into PostgreSQL successfully.")

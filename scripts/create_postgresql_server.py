@@ -1,42 +1,50 @@
 import pathlib
 import subprocess
-from typing import List
-from pathlib import Path
 from os import environ
+from pathlib import Path
+
 from dotenv import load_dotenv
 
 load_dotenv()
 
-DB_PROVIDER = environ.get('DB_PROVIDER')
+DB_PROVIDER = environ.get("DB_PROVIDER")
 
-PROJECT_DIR   = pathlib.Path(__file__).parents[1]
-TERRAFORM_DIR = PROJECT_DIR / "terraform" if DB_PROVIDER == "azure" else PROJECT_DIR / "terraform_bastion" if DB_PROVIDER == "azure_tunnel" else None
-STATE_FILE    = "terraform.tfvars"
+PROJECT_DIR = pathlib.Path(__file__).parents[1]
+TERRAFORM_DIR = (
+    PROJECT_DIR / "terraform"
+    if DB_PROVIDER == "azure"
+    else PROJECT_DIR / "terraform_bastion"
+    if DB_PROVIDER == "azure_tunnel"
+    else None
+)
+STATE_FILE = "terraform.tfvars"
 
 # Format terraform config
 TERRAFORM_CONF = f"""
-allowed_db_cidr = "{environ['ALLOWED_IP']}"
-db_admin = "{environ['DB_USER']}"
-db_name = "{environ['DB_NAME']}"
-db_password = "{environ['DB_PASSWORD']}"
-db_port = "{environ['DB_PORT']}"
-host_admin = "{environ['HOST_ADMIN']}"
-location = "{environ['AZURE_LOCATION']}"
-pgdata = "{environ['PGDATA_DIR']}"
-postgres_server_name = "{environ['POSTRES_SERVER_NAME']}"
-postgres_version = "{environ['POSTGRES_VERSION']}"
-resource_group_name = "{environ['AZURE_RESOURCE_GROUP_NAME']}"
-ssh_public_key_path = "{environ['SSH_KEY_PATH']}"
-subscription_id = "{environ['AZURE_SUBSCRIPTION_ID']}"
-vm_name = "{environ['VM_NAME']}"
-vnet_cidr = "{environ['VNET_CIDR']}"
+allowed_db_cidr = "{environ["ALLOWED_IP"]}"
+db_admin = "{environ["DB_USER"]}"
+db_name = "{environ["DB_NAME"]}"
+db_password = "{environ["DB_PASSWORD"]}"
+db_port = "{environ["DB_PORT"]}"
+host_admin = "{environ["HOST_ADMIN"]}"
+location = "{environ["AZURE_LOCATION"]}"
+pgdata = "{environ["PGDATA_DIR"]}"
+postgres_server_name = "{environ["POSTRES_SERVER_NAME"]}"
+postgres_version = "{environ["POSTGRES_VERSION"]}"
+resource_group_name = "{environ["AZURE_RESOURCE_GROUP_NAME"]}"
+ssh_public_key_path = "{environ["SSH_KEY_PATH"]}"
+subscription_id = "{environ["AZURE_SUBSCRIPTION_ID"]}"
+vm_name = "{environ["VM_NAME"]}"
+vnet_cidr = "{environ["VNET_CIDR"]}"
 """
 
-def _tf(cmd: List[str]) -> None:
+
+def _tf(cmd: list[str]) -> None:
     """
     Run a Terraform CLI command with the working directory set to TERRAFORM_DIR.
     """
     subprocess.run(["terraform", *cmd], cwd=TERRAFORM_DIR, check=True)
+
 
 def write_tfvars(config: str, path: Path) -> None:
     """
@@ -44,6 +52,7 @@ def write_tfvars(config: str, path: Path) -> None:
     """
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(config.strip() + "\n", encoding="utf-8")
+
 
 def apply_tf() -> None:
     """
