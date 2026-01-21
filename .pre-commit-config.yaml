@@ -18,3 +18,19 @@ repos:
       - id: ruff-check
         args: [--fix]
       - id: ruff-format
+
+  # SQLFluff for dbt SQL
+  - repo: local
+    hooks:
+      - id: sqlfluff-lint
+        name: sqlfluff-lint (uv)
+        entry: uv run sqlfluff lint --config .sqlfluff
+        language: system
+        types: [sql]
+        files: ^dbt/dbt_activities/(models|macros)/.*\.sql$
+      - id: sqlfluff-fix
+        name: sqlfluff-fix (uv)
+        entry: uv run sqlfluff fix --config .sqlfluff
+        language: system
+        types: [sql]
+        files: ^dbt/dbt_activities/(models|macros)/.*\.sql$
