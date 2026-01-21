@@ -25,7 +25,7 @@ def dbt_profiles(context: AssetExecutionContext) -> None:
 
 # Get csv file with degustations
 @asset(
-    description="Raw degustation activities downloaded from the Pays de la Loire tourism API.", 
+    description="Raw degustation activities downloaded from the Pays de la Loire tourism API.",
     compute_kind="python"
 )
 def degustations_file(context: AssetExecutionContext) -> None:
@@ -58,4 +58,3 @@ def degustations_raw_table(context: AssetExecutionContext) -> None:
         csv_path=CSV_PATH,
         if_exists="replace"
         )
-

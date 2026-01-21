@@ -45,7 +45,7 @@ def start_tunnel_op(context):
     if mode != "azure_tunnel":
         context.log.info(f"Skipping tunnel because MODE={mode}")
         return
-    
+
     port = context.op_config["port"]  # port could be set in dagster UI
     tunnel_envs = {
         **os.environ,
@@ -85,7 +85,7 @@ def assert_tunnel_op(context):
     if mode != "azure_tunnel":
         context.log.info(f"Skipping tunnel because MODE={mode}")
         return
-    
+
     port = context.op_config["port"]  # port could be set in dagster UI
     try:
         wait_for_port("127.0.0.1", port, timeout=3)

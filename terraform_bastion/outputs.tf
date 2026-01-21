@@ -32,4 +32,3 @@ output "db_password" {
 output "db_name" {
   value = "postgres"
 }
-
