@@ -1,0 +1,12 @@
+[sqlfluff]
+dialect = postgres
+templater = dbt
+max_line_length = 120
+
+[sqlfluff:templater:dbt]
+project_dir = dbt/dbt_activities
+profiles_dir = dbt/dbt_activities
+
+[sqlfluff:rules]
+# for future
+# exclude_rules = L031,L034
