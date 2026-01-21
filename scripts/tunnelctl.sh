@@ -8,7 +8,7 @@
 # Env vars:
 #   LOCAL_PORT                  Local TCP port to bind (default: 5432)
 #   NAME                        Bastion name                       (required)
-#   AZURE_SUBSCRIPTION_ID       Azure subscription ID              (required) 
+#   AZURE_SUBSCRIPTION_ID       Azure subscription ID              (required)
 #   AZURE_RESOURCE_GROUP_NAME   Azure resource group               (required)
 #   VM_NAME                     Azure VM name                      (required)
 #   RESOURCE_PORT               Target resource port (default: 5432)
@@ -215,7 +215,7 @@ case "${1:-}" in
     cat >&2 <<EOF
 Usage: tunnelctl {start|status|stop}
   Env: LOCAL_PORT (default 5432), RESOURCE_PORT (default 5432),
-       NAME (required), AZURE_RESOURCE_GROUP_NAME (required), VM_NAME (required), 
+       NAME (required), AZURE_RESOURCE_GROUP_NAME (required), VM_NAME (required),
        STATE_DIR (default /tmp/bastion-tunnel-$USER_ID)
 Examples:
   LOCAL_PORT=5432 NAME=bastion-host AZURE_RESOURCE_GROUP_NAME=my-rg VM_NAME=my-vm \\

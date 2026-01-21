@@ -94,5 +94,3 @@ select
       'lon_norm'
   ]) }} as activity_key
 from normalized
-  
-
