@@ -1,6 +1,8 @@
 from pathlib import Path
+
 from dagster import AssetExecutionContext, Definitions, load_assets_from_modules
 from dagster_dbt import DbtCliResource, DbtProject, dbt_assets
+
 from orchestration import assets, jobs
 
 all_assets = load_assets_from_modules([assets])
@@ -18,16 +20,21 @@ dbt_cli = DbtCliResource(
     target="dev",
 )
 
+
 # Yields Dagster events streamed from the dbt CLI
 @dbt_assets(manifest=dbt_project.manifest_path)
 def dbt_models(context: AssetExecutionContext, dbt: DbtCliResource):
     args = [
         "build",
-        "--project-dir", str(dbt_project_directory),
-        "--profiles-dir", str(dbt_project_directory),
-        "--target", "dev",
+        "--project-dir",
+        str(dbt_project_directory),
+        "--profiles-dir",
+        str(dbt_project_directory),
+        "--target",
+        "dev",
     ]
     yield from dbt.cli(args, context=context).stream()
+
 
 defs = Definitions(
     assets=[

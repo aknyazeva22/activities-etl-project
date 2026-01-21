@@ -1,32 +1,34 @@
 import os
-import time
 import runpy
 import socket
 import subprocess
-from dagster import op, job, SkipReason
-from dotenv import load_dotenv
-from sqlalchemy import create_engine, text
+import time
 
+from dagster import job, op
+from dotenv import load_dotenv
 
 load_dotenv()
 
-DB_USER = os.environ.get('DB_USER')
-DB_PASSWORD = os.environ.get('DB_PASSWORD')
-DB_NAME = os.environ.get('DB_NAME')
+DB_USER = os.environ.get("DB_USER")
+DB_PASSWORD = os.environ.get("DB_PASSWORD")
+DB_NAME = os.environ.get("DB_NAME")
 DB_HOST = "127.0.0.1"
-DB_PORT = os.environ.get('DB_PORT', '5432')  # port on VM
-LOCAL_PORT = os.environ.get('DB_PORT', '5432')  # port on localhost for tunnel
+DB_PORT = os.environ.get("DB_PORT", "5432")  # port on VM
+LOCAL_PORT = os.environ.get("DB_PORT", "5432")  # port on localhost for tunnel
 
-BASTION_NAME = os.environ.get('BASTION_NAME', 'bastion-host')
+BASTION_NAME = os.environ.get("BASTION_NAME", "bastion-host")
+
 
 # Infrastructure
 @op
 def create_azure_psql_server():
     runpy.run_module("scripts.create_postgresql_server", run_name="__main__")
 
+
 @job
 def provision_infra():
     create_azure_psql_server()
+
 
 # Tunnel
 def wait_for_port(host, port, timeout=30):
@@ -37,6 +39,7 @@ def wait_for_port(host, port, timeout=30):
                 return
         time.sleep(0.25)
     raise RuntimeError(f"Port {port} on {host} did not open in time")
+
 
 @op(config_schema={"port": int})
 def start_tunnel_op(context):
@@ -55,7 +58,7 @@ def start_tunnel_op(context):
     }
     try:
         completed = subprocess.run(
-            ["scripts/tunnelctl.sh","start"],
+            ["scripts/tunnelctl.sh", "start"],
             env=tunnel_envs,
             check=True,
             capture_output=True,
@@ -78,6 +81,7 @@ def start_tunnel_op(context):
     wait_for_port("127.0.0.1", port, timeout=60)
     context.log.info(f"Bastion tunnel UP on 127.0.0.1:{port}")
 
+
 @op(config_schema={"port": int})
 def assert_tunnel_op(context):
     # if not in azure_tunnel mode, skip
@@ -90,8 +94,9 @@ def assert_tunnel_op(context):
     try:
         wait_for_port("127.0.0.1", port, timeout=3)
         context.log.info(f"Tunnel healthy on 127.0.0.1:{port}")
-    except Exception:
-        raise RuntimeError("Tunnel not running. Start it first.")
+    except Exception as e:
+        raise RuntimeError("Tunnel not running. Start it first.") from e
+
 
 @op
 def stop_tunnel_op(context):
@@ -101,16 +106,18 @@ def stop_tunnel_op(context):
         context.log.info(f"Skipping tunnel because MODE={mode}")
         return
 
-    subprocess.run(["scripts/tunnelctl.sh","stop"], check=True, capture_output=True, text=True)
+    subprocess.run(["scripts/tunnelctl.sh", "stop"], check=True, capture_output=True, text=True)
 
 
 @job
 def start_tunnel():
     start_tunnel_op()
 
+
 @job
 def assert_tunnel():
     assert_tunnel_op()
+
 
 @job
 def stop_tunnel():

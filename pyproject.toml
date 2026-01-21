@@ -44,3 +44,13 @@ code_location_name = "orchestration"
 
 [tool.setuptools.packages.find]
 exclude=["dagster_tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.ruff.format]
+quote-style = "double"

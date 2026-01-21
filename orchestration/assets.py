@@ -1,13 +1,13 @@
 import os
 import runpy
+
 from dagster import AssetExecutionContext, asset
-from dagster_dbt import dbt_assets
 
 from scripts.load_raw_data import get_engine, push_to_table, read_raw_data
 
-CSV_PATH = 'data/degustations.csv'
+CSV_PATH = "data/degustations.csv"
 TABLE_NAME = "raw_degustation_data"
-SCHEMA = os.environ.get('DB_SCHEMA', 'public')
+SCHEMA = os.environ.get("DB_SCHEMA", "public")
 SOURCE_SYSTEM = "degustations_csv"
 
 
@@ -23,10 +23,11 @@ def dbt_profiles(context: AssetExecutionContext) -> None:
     context.log.info("Creating profiles for dbt from the infrastructure")
     runpy.run_module("scripts.generate_profiles", run_name="__main__")
 
+
 # Get csv file with degustations
 @asset(
     description="Raw degustation activities downloaded from the Pays de la Loire tourism API.",
-    compute_kind="python"
+    compute_kind="python",
 )
 def degustations_file(context: AssetExecutionContext) -> None:
     """
@@ -34,6 +35,7 @@ def degustations_file(context: AssetExecutionContext) -> None:
     """
     context.log.info("Running extract step")
     runpy.run_module("scripts.download_degustation_csv", run_name="__main__")
+
 
 # Create raw data table
 @asset(
@@ -56,5 +58,5 @@ def degustations_raw_table(context: AssetExecutionContext) -> None:
         ingestion_id=context.run_id,
         source_system=SOURCE_SYSTEM,
         csv_path=CSV_PATH,
-        if_exists="replace"
-        )
+        if_exists="replace",
+    )
