@@ -96,7 +96,12 @@ The raw layer contains data ingested from the source CSV with minimal transforma
 The source schema and column definitions can be found on the official platform: <https://data.paysdelaloire.fr/explore/dataset/234400034_070-010_offre-touristique-degustations-rpdl/information/>
 
 Added technical metadata columns:
-  - TODO
+- Source row number (source_row_number)
+- Ingestion id (ingestion_id)
+- Timestamp of ingestion (ingested_at)
+- File name of source (source_file_name)
+- Source type (source_system)
+- Hash of line as a text (source_hash)
 
 ---
 
