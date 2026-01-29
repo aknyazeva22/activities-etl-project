@@ -1,0 +1,22 @@
+name: CI
+run-name: ${{ github.actor }} is testing out code
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  lint-and-unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: astral-sh/setup-uv@v3
+
+      - name: Install
+        run: uv sync --all-extras --dev
+
+      - name: Pre-commit
+        run: uv run pre-commit run --all-files
+
+      - run: echo "Job's status is ${{ job.status }}."
