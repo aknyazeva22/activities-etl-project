@@ -1,0 +1,12 @@
+dbt_activities_ci:
+  target: ci
+  outputs:
+    ci:
+      type: postgres
+      host: "{{ env_var('PGHOST', 'localhost') }}"
+      user: "{{ env_var('PGUSER') }}"
+      password: "{{ env_var('PGPASSWORD') }}"
+      port: "{{ env_var('PGPORT', '5432') | int }}"
+      dbname: "{{ env_var('PGDATABASE') }}"
+      schema: "public"
+      threads: 4
