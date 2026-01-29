@@ -1,4 +1,4 @@
-dbt_activities_ci:
+dbt_activities:
   target: ci
   outputs:
     ci:
@@ -8,5 +8,5 @@ dbt_activities_ci:
       password: "{{ env_var('PGPASSWORD') }}"
       port: "{{ env_var('PGPORT', '5432') | int }}"
       dbname: "{{ env_var('PGDATABASE') }}"
-      schema: "public"
+      schema: "{{ env_var('PGSCHEMA', 'schema') }}"
       threads: 4
