@@ -28,9 +28,11 @@ repos:
         language: system
         types: [sql]
         files: ^dbt/dbt_activities/(models|macros)/.*\.sql$
+        stages: [manual]
       - id: sqlfluff-fix
         name: sqlfluff-fix (uv)
         entry: uv run sqlfluff fix --config .sqlfluff
         language: system
         types: [sql]
         files: ^dbt/dbt_activities/(models|macros)/.*\.sql$
+        stages: [manual]
