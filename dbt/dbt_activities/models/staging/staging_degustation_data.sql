@@ -75,6 +75,9 @@ normalized as (
         *,
         LOWER(TRIM(COALESCE(offer_name, ''))) as offer_name_norm,
         LOWER(TRIM(COALESCE(address_line1, ''))) as address1_norm,
+        LOWER(TRIM(COALESCE(address_line2, ''))) as address2_norm,
+        LOWER(TRIM(COALESCE(address_line3, ''))) as address3_norm,
+        LOWER(TRIM(COALESCE(address_line4, ''))) as address4_norm,
         LOWER(TRIM(COALESCE(postal_code, ''))) as postal_code_norm,
         LOWER(TRIM(COALESCE(city_name, ''))) as city_norm,
         CAST(ROUND(CAST(latitude as numeric), 5) as text) as lat_norm,
@@ -87,9 +90,10 @@ select
   {{ dbt_utils.generate_surrogate_key([
       'offer_name_norm',
       'address1_norm',
+      'address2_norm',
+      'address3_norm',
+      'address4_norm',
       'postal_code_norm',
       'city_norm',
-      'lat_norm',
-      'lon_norm'
   ]) }} as activity_key
 from normalized
