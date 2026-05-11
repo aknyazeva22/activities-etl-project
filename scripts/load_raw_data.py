@@ -1,59 +1,13 @@
-import os
-import sys
 from datetime import UTC, datetime
 from hashlib import sha256
 from pathlib import Path
 
 import pandas as pd
-from dotenv import load_dotenv
 from pandas import DataFrame
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import inspect
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.engine import Engine
 from sqlalchemy.schema import CreateSchema
-
-from scripts.utils import determine_terraform_dir, load_terraform_outputs
-
-load_dotenv()
-# Load environment variables
-DB_PROVIDER = os.environ.get("DB_PROVIDER")
-AZURE_SUBSCRIPTION_ID = os.environ.get("AZURE_SUBSCRIPTION_ID") if DB_PROVIDER == "azure" else None
-AZURE_RESOURCE_GROUP_NAME = (
-    os.environ.get("AZURE_RESOURCE_GROUP_NAME") if DB_PROVIDER == "azure" else None
-)
-VM_NAME = os.environ.get("VM_NAME") if DB_PROVIDER == "azure" else None
-DB_USER = os.environ.get("DB_USER")
-DB_PASSWORD = os.environ.get("DB_PASSWORD")
-DB_HOST = (
-    "127.0.0.1" if DB_PROVIDER in ["local", "azure_tunnel"] else None
-)  # for azure VM this is not needed, since we take connection string from terraform
-DB_PORT = (
-    os.environ.get("LOCAL_PORT", "5432")
-    if DB_PROVIDER == "azure_tunnel"
-    else os.environ.get("DB_PORT", "5432")
-)
-DB_NAME = os.environ.get("DB_NAME")
-
-
-def get_engine() -> Engine:
-    """
-    Build a SQLAlchemy Engine from environment variables.
-    """
-    if DB_PROVIDER == "azure":
-        # get connection string from terraform outputs
-        tf_dir = determine_terraform_dir()
-        outputs = load_terraform_outputs(tf_dir)
-
-        try:
-            connection_string = outputs["postgres_example_conn_str"]["value"]
-        except KeyError as missing:
-            sys.exit(f"[fatal] missing key in terraform outputs: {missing}")
-
-    elif DB_PROVIDER in ["local", "azure_tunnel"]:
-        connection_string = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-    else:
-        sys.exit(f"[fatal] provider type is not supported: {DB_PROVIDER}")
-
-    return create_engine(connection_string)
 
 
 def ensure_pg_schema(engine: Engine, schema: str) -> None:
@@ -114,27 +68,36 @@ def add_technical_metadata(
     return out
 
 
+def insert_on_conflict_do_nothing(table_name, conn, keys, data_iter):
+    rows = [dict(zip(keys, row, strict=True)) for row in data_iter]
+
+    if not rows:
+        return 0
+
+    stmt = insert(table_name.table).values(rows)
+    stmt = stmt.on_conflict_do_nothing(index_elements=["source_hash"])
+
+    result = conn.execute(stmt)
+    return result.rowcount
+
+
 def push_to_table(
     df: DataFrame,
     engine: Engine,
-    table_name: str,
     *,
     csv_path: str,
     ingestion_id: str,
     source_system: str,
-    schema: str | None = None,
-    if_exists: str = "replace",
+    if_exists: str = "append",
     index: bool = False,
 ) -> None:
     """
     Push a pandas DataFrame to a SQL table.
     """
     # Ensure schema exists
-    if schema is None:
-        schema = inspect(engine).default_schema
-    else:
-        if not inspect(engine).has_schema(schema):
-            ensure_pg_schema(engine, schema)
+
+    if not inspect(engine).has_schema("raw"):
+        ensure_pg_schema(engine, "raw")
 
     if df.empty:
         raise ValueError("Nothing to write: DataFrame is empty.")
@@ -148,11 +111,11 @@ def push_to_table(
     )
 
     df.to_sql(
-        name=table_name,
+        name="raw_degustation_data",
         con=engine,
-        schema=schema,
+        schema="raw",
         if_exists=if_exists,
         index=index,
-        method="multi",  # batch rows
+        method=insert_on_conflict_do_nothing,
     )
     print("CSV with raw data loaded into PostgreSQL successfully.")

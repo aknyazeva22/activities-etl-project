@@ -2,8 +2,10 @@ import os
 import runpy
 
 from dagster import AssetExecutionContext, asset
+from sqlalchemy import inspect
 
-from scripts.load_raw_data import get_engine, push_to_table, read_raw_data
+from scripts.db import get_engine
+from scripts.load_raw_data import push_to_table, read_raw_data
 
 CSV_PATH = "data/degustations.csv"
 TABLE_NAME = "raw_degustation_data"
@@ -50,13 +52,15 @@ def degustations_raw_table(context: AssetExecutionContext) -> None:
     df = read_raw_data(CSV_PATH)
     context.log.info("Running load step")
     engine = get_engine()
+    # check if table exists
+    if not inspect(engine).has_table("raw.raw_degustation_data"):
+        runpy.run_module("scripts.run_migrations", run_name="__main__")
+
     push_to_table(
         df=df,
         engine=engine,
-        table_name=TABLE_NAME,
-        schema=SCHEMA,
         ingestion_id=context.run_id,
         source_system=SOURCE_SYSTEM,
         csv_path=CSV_PATH,
-        if_exists="replace",
+        if_exists="append",
     )
