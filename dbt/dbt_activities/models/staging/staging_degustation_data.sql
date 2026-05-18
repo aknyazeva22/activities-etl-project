@@ -54,7 +54,13 @@ with src as (
             and "Adresse1Suite" is not NULL
             and "Adresse partie 2" is not NULL
             and "Adresse partie 3" is not NULL, FALSE
-        ) as is_address_given
+        ) as is_address_given,
+        source_row_number,
+        ingestion_id,
+        ingested_at,
+        source_file_name,
+        source_system,
+        source_hash
 
     from {{ source('raw', 'raw_degustation_data') }}
     -- excludes activities with no contact info

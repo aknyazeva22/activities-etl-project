@@ -361,7 +361,257 @@ models:
         description: Types of offers proposed (e.g., tastings, visits, sales)
 
       - name: activity_key
+        description: Best effort business key for the activity
+        tests:
+          - not_null
+
+      - name: source_row_number
+        description: Source row number
+        tests:
+          - not_null
+
+      - name: ingestion_id
+        description: Ingestion identifier for the activity
+        tests:
+          - not_null
+
+      - name: ingested_at
+        description: Timestamp of ingestion
+        tests:
+          - not_null
+
+      - name: source_file_name
+        description: Name of source file
+        tests:
+          - not_null
+
+      - name: source_system
+        description: Source system
+        tests:
+          - not_null
+
+      - name: source_hash
+        description: Hash of source row
+        tests:
+          - not_null
+
+  - name: staging_degustation_current
+    description: Staging model fwith the current information about degustations
+    columns:
+      - name: offer_name
+        description: Name of the tourist offer
+        tests:
+          - not_null
+
+      - name: offer_type
+        description: Type of offer (e.g., wine, cheese, etc.)
+
+      - name: address_line1
+        description: Primary address field
+
+      - name: address_line2
+        description: Adresse 1 continue
+
+      - name: address_line3
+        description: Adresse part 2
+
+      - name: address_line4
+        description: Adresse part 3
+
+      - name: code_postal
+        description: Code postal
+
+      - name: postal_office
+        description: Postal office address
+
+      - name: city_name
+        description: City of the degustation offer
+
+      - name: cedex
+        description: Cedex
+
+      - name: city_code
+        description: City code
+
+      - name: latitude
+        description: Latitude
+        tests:
+          - not_null
+
+      - name: longitude
+        description: Longitude
+        tests:
+          - not_null
+
+      - name: transport_tips
+        description: Transport tips
+
+      - name: mobile_phone_number
+        description: Mobile phone number
+
+      - name: landline_number
+        description: Landline number
+
+      - name: fax
+        description: Fax number
+
+      - name: email
+        description: E-mail
+
+      - name: website
+        description: Website
+
+      - name: video_url
+        description: URL to access the video
+
+      - name: code_integration_video
+        description: Embed code to embed a video
+
+      - name: plateforme_type
+        description: Platform type/url
+
+      - name: tripadvisor_widget
+        description: Tripadvisor widget
+
+      - name: activity_sector
+        description: Activity sector
+
+      - name: quality_label
+        description: Quality labels associated with the offer
+
+      - name: accessibility_label
+        description: Accessibility label for disabled tourists
+
+      - name: animal_acceptance
+        description: Whether animals are accepted
+        tests:
+          - accepted_values:
+              values: ['oui', 'non']
+
+      - name: animal_acceptance_info
+        description: Additional information regarding animal acceptance
+
+      - name: group_acceptance
+        description: Whether groups are accepted
+        tests:
+          - accepted_values:
+              values: ['oui', 'non']
+
+      - name: maximum_group_size
+        description: Maximum number of people allowed in groups
+
+      - name: minimum_group_size
+        description: Minimum number of people required for group visits
+
+      - name: languages
+        description: Languages spoken at the reception
+
+      - name: wine_appellation
+        description: Wine appellation (e.g., AOC, IGP)
+
+      - name: free_tastings
+        description: Whether tastings are free of charge
+        tests:
+          - accepted_values:
+              values: ['oui', 'non']
+
+      - name: tasting_room
+        description: Whether a tasting room is available and equipped
+        tests:
+          - accepted_values:
+              values: ['oui', 'non']
+
+      - name: on_site_sales
+        description: Whether on-site sales are available
+        tests:
+          - accepted_values:
+              values: ['oui', 'non']
+
+      - name: duration_individual_visit
+        description: Duration of visit for individual visitors
+
+      - name: duration_group_visit
+        description: Duration of visit for group visitors
+
+      - name: regular_guided_group_visits
+        description: Guided group visits offered on a regular basis
+        tests:
+          - accepted_values:
+              values: ['oui', 'non']
+
+      - name: guided_group_visit_on_request
+        description: Guided group visits available on request
+        accepted_values:
+          values: ['Oui', 'Non']
+
+      - name: regular_self_guided_group_visits
+        description: Self-guided group visits available on a regular basis
+        tests:
+          - accepted_values:
+              values: ['oui', 'non']
+
+      - name: regular_educational_group_visits
+        description: Educational visits offered to groups on a regular basis
+        tests:
+          - accepted_values:
+              values: ['oui', 'non']
+
+      - name: regular_guided_individual_visits
+        description: Guided visits for individuals offered on a regular basis
+        tests:
+          - accepted_values:
+              values: ['oui', 'non']
+
+      - name: guided_individual_visit_on_request
+        description: Guided visits for individuals available on request
+        tests:
+          - accepted_values:
+              values: ['oui', 'non']
+
+      - name: languages_of_guided_visits
+        description: Languages spoken during guided visits
+
+      - name: regular_self_guided_individual_visits
+        description: Self-guided visits for individuals offered on a regular basis
+        tests:
+          - accepted_values:
+              values: ['oui', 'non']
+
+      - name: activity_type
+        description: Types of offers proposed (e.g., tastings, visits, sales)
+
+      - name: activity_key
         description: Unique identifier for the activity
         tests:
           - not_null
           - unique
+
+      - name: source_row_number
+        description: Source row number
+        tests:
+          - not_null
+
+      - name: ingestion_id
+        description: Ingestion identifier for the activity
+        tests:
+          - not_null
+
+      - name: ingested_at
+        description: Timestamp of ingestion
+        tests:
+          - not_null
+
+      - name: source_file_name
+        description: Name of source file
+        tests:
+          - not_null
+
+      - name: source_system
+        description: Source system
+        tests:
+          - not_null
+
+      - name: source_hash
+        description: Hash of source row
+        tests:
+          - not_null
