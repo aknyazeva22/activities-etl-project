@@ -1,13 +1,5 @@
 -- models/staging/staging_degustation_data.sql
 
-{{ config(
-    materialized = 'table',
-    post_hook = [
-        "{{ macro_safe_drop_pk(this, 'pk_stg_activities') }}",
-        "alter table {{ this }} add constraint pk_stg_activities primary key (activity_key)"
-    ]
-) }}
-
 with src as (
     select
         "Nom de l'offre touristique" as offer_name,
