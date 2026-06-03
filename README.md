@@ -165,48 +165,21 @@ You can switch between them by updating `DB_PROVIDER` in your `.env` file.
 
 
 ```
-├── data/ # Raw data source
-│   └── degustations.csv
-├── orchestration # Dagster configuration
-│   ├── assets.py
-│   ├── definitions.py
-│   └── jobs.py
+├── data/  # Raw data source
+├── orchestration/  # Dagster configuration
 ├── dbt/ # dbt project directory
-|   └── dbt_activities
+|   └── dbt_activities/
 │       ├── packages.yml
-│       ├── macros/
-│       │   └── macro_contact_info.sql
-│       └── models/
-│           ├── activities/
-│           │   ├── schema.yml
-│           │   └── sources.yml
-│           └── staging/
-│               └── staging_degustation_data.sql
-├── docker-compose.yml # Docker config for local PostgreSQL
+│       ├── macros/  # Macros for data quality checks
+│       └── models/  # dbt models
+├── docker-compose.yml  # Docker config for local PostgreSQL
 ├── pyproject.toml
 ├── README.md
-├── scripts/ # Python scripts
-│    ├── create_postgresql_server.py
-|    ├── download_degustation_csv.py
-│    ├── generate_profiles.py
-│    ├── load_raw_data.py
-|    ├── tunnelctl.sh
-│    └── utils.py
+├── scripts/ # Python scripts for tunnel, dbt profilies, raw data uploading etc.
 ├── setup.py
-├──terraform/ # Terraform config for Azure infrastructure (azure mode)
-│    ├── cloud-init-postgres.yml
-│    ├── main.tf
-│    ├── nic.tf
-│    ├── outputs.tf
-│    ├── terraform.tfvars.template
-│    └── variables.tf
-└── terraform/ # Terraform config for Azure infrastructure (azure mode)
-     ├── cloud-init-postgres.yml
-     ├── main.tf
-     ├── nic.tf
-     ├── outputs.tf
-     ├── terraform.tfvars.template
-     └── variables.tf
+├── terraform/ # Terraform config for Azure infrastructure (azure mode)
+└── terraform_bastion/ # Terraform config with Azure bastion (azure_tunnel mode)
+
 ```
 
 # Getting Started
