@@ -166,13 +166,16 @@ You can switch between them by updating `DB_PROVIDER` in your `.env` file.
 
 ```
 ├── data/  # Raw data source
-├── orchestration/  # Dagster configuration
 ├── dbt/ # dbt project directory
 |   └── dbt_activities/
 │       ├── packages.yml
 │       ├── macros/  # Macros for data quality checks
 │       └── models/  # dbt models
+├── docs/ # Documentation
 ├── docker-compose.yml  # Docker config for local PostgreSQL
+├── logs/  # System logs
+├── migrations/  # Migrations for PostgreSQL database
+├── orchestration/  # Dagster configuration
 ├── pyproject.toml
 ├── README.md
 ├── scripts/ # Python scripts for tunnel, dbt profilies, raw data uploading etc.
