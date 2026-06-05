@@ -102,15 +102,19 @@ def push_to_table(
     if df.empty:
         raise ValueError("Nothing to write: DataFrame is empty.")
 
+    ingestion_time = datetime.now(UTC)
+
     df = add_technical_metadata(
         df,
         ingestion_id=ingestion_id,
-        ingested_at=datetime.now(UTC),
+        ingested_at=ingestion_time,
         source_file_name=Path(csv_path).name,
         source_system=source_system,
     )
 
-    df.to_sql(
+    attempted_rows = len(df)
+
+    inserted_rows = df.to_sql(
         name="raw_degustation_data",
         con=engine,
         schema="raw",
@@ -119,3 +123,27 @@ def push_to_table(
         method=insert_on_conflict_do_nothing,
     )
     print("CSV with raw data loaded into PostgreSQL successfully.")
+
+    duplicate_rows = attempted_rows - inserted_rows
+
+    audit_df = DataFrame(
+        {
+            "ingestion_id": [ingestion_id],
+            "source_file_name": [Path(csv_path).name],
+            "source_system": [source_system],
+            "started_at": [ingestion_time],
+            "finished_at": [datetime.now(UTC)],
+            "status": ["success"],
+            "raw_row_count": [attempted_rows],
+            "inserted_row_count": [inserted_rows],
+            "duplicate_row_count": [duplicate_rows],
+        }
+    )
+    audit_df.to_sql(
+        name="ingestion_runs",
+        con=engine,
+        schema="audit",
+        if_exists="append",
+        index=False,
+    )
+    print("Audit table updated.")

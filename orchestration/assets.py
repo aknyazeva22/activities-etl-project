@@ -52,8 +52,10 @@ def degustations_raw_table(context: AssetExecutionContext) -> None:
     df = read_raw_data(CSV_PATH)
     context.log.info("Running load step")
     engine = get_engine()
-    # check if table exists
-    if not inspect(engine).has_table("raw.raw_degustation_data"):
+    # check if tables exist
+    if not inspect(engine).has_table("raw.raw_degustation_data") or not inspect(engine).has_table(
+        "raw_degustation_data"
+    ):
         runpy.run_module("scripts.run_migrations", run_name="__main__")
 
     push_to_table(
