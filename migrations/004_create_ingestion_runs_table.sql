@@ -1,7 +1,7 @@
 create table if not exists audit.ingestion_runs (
     ingestion_id uuid primary key,
-    source_name text not null,
     source_file_name text,
+    source_system text,
     started_at timestamptz not null,
     finished_at timestamptz,
     status text not null,
