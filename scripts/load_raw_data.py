@@ -114,6 +114,31 @@ def push_to_table(
 
     attempted_rows = len(df)
 
+    # Raise an error if the source file contains 0 rows
+    if attempted_rows == 0:
+        audit_row = {
+            "ingestion_id": ingestion_id,
+            "source_file_name": Path(csv_path).name,
+            "source_system": source_system,
+            "started_at": ingestion_time,
+            "finished_at": datetime.now(UTC),
+            "status": "failed",
+            "raw_row_count": 0,
+            "inserted_row_count": 0,
+            "duplicate_row_count": 0,
+            "error_message": "Source file contains 0 rows",
+        }
+
+        DataFrame.from_dict(audit_row).to_sql(
+            name="ingestion_runs",
+            con=engine,
+            schema="audit",
+            if_exists="append",
+            index=False,
+        )
+
+        raise ValueError("Source file contains 0 rows")
+
     inserted_rows = df.to_sql(
         name="raw_degustation_data",
         con=engine,
@@ -137,6 +162,7 @@ def push_to_table(
             "raw_row_count": [attempted_rows],
             "inserted_row_count": [inserted_rows],
             "duplicate_row_count": [duplicate_rows],
+            "error_message": [None],
         }
     )
     audit_df.to_sql(
