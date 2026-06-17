@@ -149,10 +149,50 @@ def push_to_table(
         source_system=source_system,
     )
 
-    attempted_rows = len(df)
+    try:
+        attempted_rows = len(df)
 
-    # Raise an error if the source file contains 0 rows
-    if attempted_rows == 0:
+        # Raise an error if the source file contains 0 rows
+        if attempted_rows == 0:
+            write_audit(
+                engine=engine,
+                ingestion_id=ingestion_id,
+                source_file_name=Path(csv_path).name,
+                source_system=source_system,
+                started_at=ingestion_time,
+                status="failed",
+                raw_row_count=0,
+                error_message="Source file contains 0 rows",
+            )
+
+            raise ValueError("Source file contains 0 rows")
+
+        inserted_rows = df.to_sql(
+            name="raw_degustation_data",
+            con=engine,
+            schema="raw",
+            if_exists=if_exists,
+            index=index,
+            method=insert_on_conflict_do_nothing,
+        )
+        print("CSV with raw data loaded into PostgreSQL successfully.")
+
+        duplicate_rows = attempted_rows - inserted_rows
+
+        write_audit(
+            engine=engine,
+            ingestion_id=ingestion_id,
+            source_file_name=Path(csv_path).name,
+            source_system=source_system,
+            started_at=ingestion_time,
+            status="success",
+            raw_row_count=attempted_rows,
+            inserted_row_count=inserted_rows,
+            duplicate_row_count=duplicate_rows,
+        )
+        print("Audit table updated.")
+
+    except Exception as e:
         write_audit(
             engine=engine,
             ingestion_id=ingestion_id,
@@ -160,33 +200,7 @@ def push_to_table(
             source_system=source_system,
             started_at=ingestion_time,
             status="failed",
-            raw_row_count=0,
-            error_message="Source file contains 0 rows",
+            raw_row_count=len(df),
+            error_message=str(e),
         )
-
-        raise ValueError("Source file contains 0 rows")
-
-    inserted_rows = df.to_sql(
-        name="raw_degustation_data",
-        con=engine,
-        schema="raw",
-        if_exists=if_exists,
-        index=index,
-        method=insert_on_conflict_do_nothing,
-    )
-    print("CSV with raw data loaded into PostgreSQL successfully.")
-
-    duplicate_rows = attempted_rows - inserted_rows
-
-    write_audit(
-        engine=engine,
-        ingestion_id=ingestion_id,
-        source_file_name=Path(csv_path).name,
-        source_system=source_system,
-        started_at=ingestion_time,
-        status="success",
-        raw_row_count=attempted_rows,
-        inserted_row_count=inserted_rows,
-        duplicate_row_count=duplicate_rows,
-    )
-    print("Audit table updated.")
+        raise
