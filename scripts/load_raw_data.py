@@ -81,6 +81,43 @@ def insert_on_conflict_do_nothing(table_name, conn, keys, data_iter):
     return result.rowcount
 
 
+def write_audit(
+    engine: Engine,
+    ingestion_id: str,
+    source_file_name: str,
+    source_system: str,
+    started_at: datetime,
+    status: str,
+    raw_row_count: int,
+    finished_at: datetime | None = None,
+    inserted_row_count: int | None = None,
+    duplicate_row_count: int | None = None,
+    error_message: str | None = None,
+) -> None:
+    """Write an audit record for an ingestion."""
+    audit_row = {
+        "ingestion_id": ingestion_id,
+        "source_file_name": source_file_name,
+        "source_system": source_system,
+        "started_at": started_at,
+        "finished_at": datetime.now(UTC) if finished_at is None else finished_at,
+        "status": status,
+        "raw_row_count": raw_row_count,
+        "inserted_row_count": inserted_row_count or 0,
+        "duplicate_row_count": duplicate_row_count or 0,
+        "error_message": error_message,
+    }
+
+    DataFrame.from_dict(audit_row).to_sql(
+        name="ingestion_runs",
+        con=engine,
+        schema="audit",
+        if_exists="append",
+        index=False,
+    )
+    return
+
+
 def push_to_table(
     df: DataFrame,
     engine: Engine,
@@ -116,25 +153,15 @@ def push_to_table(
 
     # Raise an error if the source file contains 0 rows
     if attempted_rows == 0:
-        audit_row = {
-            "ingestion_id": ingestion_id,
-            "source_file_name": Path(csv_path).name,
-            "source_system": source_system,
-            "started_at": ingestion_time,
-            "finished_at": datetime.now(UTC),
-            "status": "failed",
-            "raw_row_count": 0,
-            "inserted_row_count": 0,
-            "duplicate_row_count": 0,
-            "error_message": "Source file contains 0 rows",
-        }
-
-        DataFrame.from_dict(audit_row).to_sql(
-            name="ingestion_runs",
-            con=engine,
-            schema="audit",
-            if_exists="append",
-            index=False,
+        write_audit(
+            engine=engine,
+            ingestion_id=ingestion_id,
+            source_file_name=Path(csv_path).name,
+            source_system=source_system,
+            started_at=ingestion_time,
+            status="failed",
+            raw_row_count=0,
+            error_message="Source file contains 0 rows",
         )
 
         raise ValueError("Source file contains 0 rows")
@@ -151,25 +178,15 @@ def push_to_table(
 
     duplicate_rows = attempted_rows - inserted_rows
 
-    audit_df = DataFrame(
-        {
-            "ingestion_id": [ingestion_id],
-            "source_file_name": [Path(csv_path).name],
-            "source_system": [source_system],
-            "started_at": [ingestion_time],
-            "finished_at": [datetime.now(UTC)],
-            "status": ["success"],
-            "raw_row_count": [attempted_rows],
-            "inserted_row_count": [inserted_rows],
-            "duplicate_row_count": [duplicate_rows],
-            "error_message": [None],
-        }
-    )
-    audit_df.to_sql(
-        name="ingestion_runs",
-        con=engine,
-        schema="audit",
-        if_exists="append",
-        index=False,
+    write_audit(
+        engine=engine,
+        ingestion_id=ingestion_id,
+        source_file_name=Path(csv_path).name,
+        source_system=source_system,
+        started_at=ingestion_time,
+        status="success",
+        raw_row_count=attempted_rows,
+        inserted_row_count=inserted_rows,
+        duplicate_row_count=duplicate_rows,
     )
     print("Audit table updated.")
