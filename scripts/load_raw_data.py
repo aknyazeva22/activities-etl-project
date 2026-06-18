@@ -96,16 +96,16 @@ def write_audit(
 ) -> None:
     """Write an audit record for an ingestion."""
     audit_row = {
-        "ingestion_id": ingestion_id,
-        "source_file_name": source_file_name,
-        "source_system": source_system,
-        "started_at": started_at,
-        "finished_at": datetime.now(UTC) if finished_at is None else finished_at,
-        "status": status,
-        "raw_row_count": raw_row_count,
-        "inserted_row_count": inserted_row_count or 0,
-        "duplicate_row_count": duplicate_row_count or 0,
-        "error_message": error_message,
+        "ingestion_id": [ingestion_id],
+        "source_file_name": [source_file_name],
+        "source_system": [source_system],
+        "started_at": [started_at],
+        "finished_at": [datetime.now(UTC) if finished_at is None else finished_at],
+        "status": [status],
+        "raw_row_count": [raw_row_count],
+        "inserted_row_count": [inserted_row_count or 0],
+        "duplicate_row_count": [duplicate_row_count or 0],
+        "error_message": [error_message],
     }
 
     DataFrame.from_dict(audit_row).to_sql(
