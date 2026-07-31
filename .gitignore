@@ -179,6 +179,7 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file. However, if you prefer,
 #  you could uncomment the following to ignore the enitre vscode folder
 # .vscode/
+*.code-workspace
 
 # Ruff stuff:
 .ruff_cache/
@@ -200,7 +201,11 @@ terraform.tfvars
 tfplan
 
 # dbt
+**/.user.yml
 dbt/dbt_activities/dbt_packages/
 dbt/dbt_activities/target/
 dbt/dbt_activities/logs/
 dbt/dbt_activities/profiles.yml
+
+# dagster
+.tmp_dagster_*
