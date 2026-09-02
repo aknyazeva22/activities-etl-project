@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from hashlib import sha256
@@ -9,6 +10,8 @@ from sqlalchemy import inspect
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.engine import Engine
 from sqlalchemy.schema import CreateSchema
+
+logger = logging.getLogger(__name__)
 
 
 class AuditWriteError(RuntimeError):
@@ -190,10 +193,25 @@ def push_to_table(
     if not inspect(engine).has_schema("raw"):
         ensure_pg_schema(engine, "raw")
 
-    if df.empty:
-        raise EmptySourceFileError("Nothing to write: DataFrame is empty.")
-
     ingestion_time = datetime.now(UTC)
+
+    if df.empty:
+        audit_record = AuditRecord(
+            ingestion_id=ingestion_id,
+            source_file_name=Path(csv_path).name,
+            source_system=source_system,
+            started_at=ingestion_time,
+            status="failed",
+            raw_row_count=0,
+            error_message="Source file contains 0 rows",
+        )
+
+        write_audit(
+            engine=engine,
+            audit_record=audit_record,
+        )
+
+        raise EmptySourceFileError("Source file contains 0 rows")
 
     df = add_technical_metadata(
         df,
@@ -206,34 +224,21 @@ def push_to_table(
     try:
         attempted_rows = len(df)
 
-        # Raise an error if the source file contains 0 rows
-        if attempted_rows == 0:
-            audit_record = AuditRecord(
-                ingestion_id=ingestion_id,
-                source_file_name=Path(csv_path).name,
-                source_system=source_system,
-                started_at=ingestion_time,
-                status="failed",
-                raw_row_count=0,
-                error_message="Source file contains 0 rows",
+        inserted_rows = (
+            df.to_sql(
+                name="raw_degustation_data",
+                con=engine,
+                schema="raw",
+                if_exists=if_exists,
+                index=index,
+                method=insert_on_conflict_do_nothing,
             )
-
-            write_audit(
-                engine=engine,
-                audit_record=audit_record,
-            )
-
-            raise EmptySourceFileError("Source file contains 0 rows")
-
-        inserted_rows = df.to_sql(
-            name="raw_degustation_data",
-            con=engine,
-            schema="raw",
-            if_exists=if_exists,
-            index=index,
-            method=insert_on_conflict_do_nothing,
+            or 0
+        )  # convert None to 0
+        logger.info(
+            "CSV with raw data loaded into PostgreSQL successfully: %d rows",
+            inserted_rows,
         )
-        print("CSV with raw data loaded into PostgreSQL successfully.")
 
         duplicate_rows = attempted_rows - inserted_rows
 
@@ -251,7 +256,7 @@ def push_to_table(
             engine=engine,
             audit_record=audit_record,
         )
-        print("Audit table updated.")
+        logger.info("Audit table updated.")
 
     except Exception as e:
         audit_record = AuditRecord(
@@ -267,4 +272,5 @@ def push_to_table(
             engine=engine,
             audit_record=audit_record,
         )
+        logger.error("Load failed: %s", e)
         raise
