@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from hashlib import sha256
 from pathlib import Path
@@ -8,6 +9,55 @@ from sqlalchemy import inspect
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.engine import Engine
 from sqlalchemy.schema import CreateSchema
+
+
+@dataclass
+class AuditRecord:
+    """
+    Audit record for an ingestion, written to the table 'audit.raw_ingestion_runs'.
+    """
+
+    ingestion_id: str
+    source_file_name: str
+    source_system: str
+    status: str
+    raw_row_count: int
+    started_at: datetime
+    finished_at: datetime | None = None
+    inserted_row_count: int | None = None
+    duplicate_row_count: int | None = None
+    error_message: str | None = None
+
+    def __post_init__(self):
+        """Called automatically after __init__ by the dataclass."""
+        if not self.is_valid():
+            raise ValueError("Audit record is missing required fields")
+
+        return
+
+    def to_dict(self) -> dict[str, str | int | datetime | None]:
+        return {
+            "ingestion_id": self.ingestion_id,
+            "source_file_name": self.source_file_name,
+            "source_system": self.source_system,
+            "started_at": self.started_at,
+            "finished_at": self.finished_at,
+            "status": self.status,
+            "raw_row_count": self.raw_row_count,
+            "inserted_row_count": self.inserted_row_count,
+            "duplicate_row_count": self.duplicate_row_count,
+            "error_message": self.error_message,
+        }
+
+    def to_df(self) -> DataFrame:
+        return DataFrame.from_dict(self.to_dict(), orient="index").T
+
+    def is_valid(self) -> bool:
+        return (
+            self.ingestion_id is not None
+            and self.source_file_name is not None
+            and self.source_system is not None
+        )
 
 
 def ensure_pg_schema(engine: Engine, schema: str) -> None:
@@ -83,38 +133,24 @@ def insert_on_conflict_do_nothing(table_name, conn, keys, data_iter):
 
 def write_audit(
     engine: Engine,
-    ingestion_id: str,
-    source_file_name: str,
-    source_system: str,
-    started_at: datetime,
-    status: str,
-    raw_row_count: int,
-    finished_at: datetime | None = None,
-    inserted_row_count: int | None = None,
-    duplicate_row_count: int | None = None,
-    error_message: str | None = None,
+    audit_record: AuditRecord,
 ) -> None:
     """Write an audit record for an ingestion."""
-    audit_row = {
-        "ingestion_id": [ingestion_id],
-        "source_file_name": [source_file_name],
-        "source_system": [source_system],
-        "started_at": [started_at],
-        "finished_at": [datetime.now(UTC) if finished_at is None else finished_at],
-        "status": [status],
-        "raw_row_count": [raw_row_count],
-        "inserted_row_count": [inserted_row_count or 0],
-        "duplicate_row_count": [duplicate_row_count or 0],
-        "error_message": [error_message],
-    }
+    if not audit_record.is_valid():
+        raise ValueError("Audit record is missing required fields")
 
-    DataFrame.from_dict(audit_row).to_sql(
+    if audit_record.finished_at is None:
+        audit_record.finished_at = datetime.now(UTC)
+
+    audit_row = audit_record.to_df()
+    audit_row.to_sql(
         name="ingestion_runs",
         con=engine,
         schema="audit",
         if_exists="append",
         index=False,
     )
+
     return
 
 
@@ -154,8 +190,7 @@ def push_to_table(
 
         # Raise an error if the source file contains 0 rows
         if attempted_rows == 0:
-            write_audit(
-                engine=engine,
+            audit_record = AuditRecord(
                 ingestion_id=ingestion_id,
                 source_file_name=Path(csv_path).name,
                 source_system=source_system,
@@ -163,6 +198,11 @@ def push_to_table(
                 status="failed",
                 raw_row_count=0,
                 error_message="Source file contains 0 rows",
+            )
+
+            write_audit(
+                engine=engine,
+                audit_record=audit_record,
             )
 
             raise ValueError("Source file contains 0 rows")
@@ -179,8 +219,7 @@ def push_to_table(
 
         duplicate_rows = attempted_rows - inserted_rows
 
-        write_audit(
-            engine=engine,
+        audit_record = AuditRecord(
             ingestion_id=ingestion_id,
             source_file_name=Path(csv_path).name,
             source_system=source_system,
@@ -190,11 +229,14 @@ def push_to_table(
             inserted_row_count=inserted_rows,
             duplicate_row_count=duplicate_rows,
         )
+        write_audit(
+            engine=engine,
+            audit_record=audit_record,
+        )
         print("Audit table updated.")
 
     except Exception as e:
-        write_audit(
-            engine=engine,
+        audit_record = AuditRecord(
             ingestion_id=ingestion_id,
             source_file_name=Path(csv_path).name,
             source_system=source_system,
@@ -202,5 +244,9 @@ def push_to_table(
             status="failed",
             raw_row_count=len(df),
             error_message=str(e),
+        )
+        write_audit(
+            engine=engine,
+            audit_record=audit_record,
         )
         raise
