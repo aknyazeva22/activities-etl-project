@@ -11,6 +11,24 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.schema import CreateSchema
 
 
+class AuditWriteError(RuntimeError):
+    """Raised when an audit record cannot be persisted."""
+
+    pass
+
+
+class EmptySourceFileError(ValueError):
+    """Raised when a source CSV file contains no data rows."""
+
+    pass
+
+
+class SchemaCreationError(RuntimeError):
+    """Raised when a required database schema cannot be created."""
+
+    pass
+
+
 @dataclass
 class AuditRecord:
     """
@@ -31,7 +49,7 @@ class AuditRecord:
     def __post_init__(self):
         """Called automatically after __init__ by the dataclass."""
         if not self.is_valid():
-            raise ValueError("Audit record is missing required fields")
+            raise AuditWriteError("Audit record is missing required fields")
 
         return
 
@@ -68,7 +86,7 @@ def ensure_pg_schema(engine: Engine, schema: str) -> None:
         try:
             conn.execute(ddl)
         except Exception as e:
-            raise RuntimeError(f"Failed to create schema '{schema}': {e}") from e
+            raise SchemaCreationError(f"Failed to create schema '{schema}': {e}") from e
 
     return
 
@@ -137,7 +155,7 @@ def write_audit(
 ) -> None:
     """Write an audit record for an ingestion."""
     if not audit_record.is_valid():
-        raise ValueError("Audit record is missing required fields")
+        raise AuditWriteError("Audit record is missing required fields")
 
     if audit_record.finished_at is None:
         audit_record.finished_at = datetime.now(UTC)
@@ -173,7 +191,7 @@ def push_to_table(
         ensure_pg_schema(engine, "raw")
 
     if df.empty:
-        raise ValueError("Nothing to write: DataFrame is empty.")
+        raise EmptySourceFileError("Nothing to write: DataFrame is empty.")
 
     ingestion_time = datetime.now(UTC)
 
@@ -205,7 +223,7 @@ def push_to_table(
                 audit_record=audit_record,
             )
 
-            raise ValueError("Source file contains 0 rows")
+            raise EmptySourceFileError("Source file contains 0 rows")
 
         inserted_rows = df.to_sql(
             name="raw_degustation_data",
