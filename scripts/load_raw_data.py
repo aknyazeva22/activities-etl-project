@@ -83,13 +83,14 @@ class AuditRecord:
 
 def ensure_pg_schema(engine: Engine, schema: str) -> None:
     """Postgres-only: create schema if missing."""
-    ddl = CreateSchema(schema, if_not_exists=True)
+    if not inspect(engine).has_schema(schema):
+        ddl = CreateSchema(schema, if_not_exists=True)
 
-    with engine.begin() as conn:
-        try:
-            conn.execute(ddl)
-        except Exception as e:
-            raise SchemaCreationError(f"Failed to create schema '{schema}': {e}") from e
+        with engine.begin() as conn:
+            try:
+                conn.execute(ddl)
+            except Exception as e:
+                raise SchemaCreationError(f"Failed to create schema '{schema}': {e}") from e
 
     return
 
@@ -189,9 +190,7 @@ def push_to_table(
     Push a pandas DataFrame to a SQL table.
     """
     # Ensure schema exists
-
-    if not inspect(engine).has_schema("raw"):
-        ensure_pg_schema(engine, "raw")
+    ensure_pg_schema(engine, "raw")
 
     ingestion_time = datetime.now(UTC)
 
