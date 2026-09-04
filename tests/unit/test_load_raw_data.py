@@ -10,8 +10,10 @@ from scripts.load_raw_data import (
     AuditRecord,
     AuditWriteError,
     EmptySourceFileError,
+    add_technical_metadata,
     push_to_table,
     read_raw_data,
+    write_audit,
 )
 
 
@@ -49,6 +51,30 @@ def test_push_to_table_empty():
         )
 
 
+def test_add_technical_metadata():
+    df = pd.DataFrame({"col1": [1, 2, 3, 3], "col2": ["a", "b", "c", "c"]})
+    df = add_technical_metadata(
+        df,
+        ingestion_id="ingestion_id",
+        source_file_name="source_file_name",
+        source_system="source_system",
+    )
+    assert "source_row_number" in df.columns
+    assert "ingestion_id" in df.columns
+    assert "ingested_at" in df.columns
+    assert "source_file_name" in df.columns
+    assert "source_system" in df.columns
+
+    assert df["source_row_number"].tolist() == [1, 2, 3, 4]
+    assert df["ingestion_id"].tolist() == ["ingestion_id"] * 4
+    assert isinstance(df["ingested_at"][0], datetime)
+    assert df["source_file_name"].tolist() == ["source_file_name"] * 4
+    assert df["source_system"].tolist() == ["source_system"] * 4
+
+    # check that the source hash is the same for duplicate rows
+    assert df["source_hash"][2] == df["source_hash"][3]
+
+
 def test_audit_record_is_invalid():
     with pytest.raises(AuditWriteError) as excinfo:
         AuditRecord(
@@ -61,3 +87,19 @@ def test_audit_record_is_invalid():
         )
 
     assert "Audit record is missing required fields" in str(excinfo.value)
+
+
+def test_write_audit_add_finished_at():
+    engine = MagicMock()
+    audit_record = AuditRecord(
+        ingestion_id="ingestion_id",
+        source_file_name="source_file_name",
+        source_system="source_system",
+        started_at=datetime.now(UTC),
+        status="success",
+        raw_row_count=100,
+    )
+    write_audit(engine, audit_record)
+    assert audit_record.finished_at
+    assert isinstance(audit_record.finished_at, datetime)
+    assert audit_record.finished_at > audit_record.started_at
