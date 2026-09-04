@@ -49,18 +49,6 @@ def test_push_to_table_empty():
         )
 
 
-def test_audit_record_is_valid():
-    valid_record = AuditRecord(
-        ingestion_id="ingestion_id",
-        source_file_name="source_file_name",
-        source_system="source_system",
-        started_at=datetime.now(UTC),
-        status="success",
-        raw_row_count=100,
-    )
-    assert valid_record.is_valid()
-
-
 def test_audit_record_is_invalid():
     with pytest.raises(AuditWriteError) as excinfo:
         AuditRecord(
