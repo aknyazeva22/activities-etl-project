@@ -15,17 +15,21 @@ from scripts.load_raw_data import (
 )
 
 
-def test_read_raw_data():
-    csv_path = "data/degustations.csv"
-    df = read_raw_data(csv_path)
-    assert not df.empty
+def test_read_raw_data(tmp_path):
+    csv_file = tmp_path / "test.csv"
+    csv_file.write_text("col1;col2\n1;a\n2;b")
+
+    df = read_raw_data(str(csv_file))
+    assert len(df) == 2
+    assert "col1" in df.columns
 
 
 def test_read_raw_data_file_not_found():
     csv_path = "data/empty.csv"
     with pytest.raises(FileNotFoundError) as excinfo:
         read_raw_data(csv_path)
-        assert "Source file contains 0 rows" in str(excinfo.value)
+
+    assert "CSV file not found" in str(excinfo.value)
 
 
 def test_push_to_table_empty():
@@ -67,4 +71,5 @@ def test_audit_record_is_invalid():
             status="success",
             raw_row_count=100,
         )
-        assert "Audit record is missing required fields" in str(excinfo.value)
+
+    assert "Audit record is missing required fields" in str(excinfo.value)
