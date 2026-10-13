@@ -1,9 +1,11 @@
 import logging
 from datetime import UTC, datetime
 from hashlib import sha256
+from os import environ
 from pathlib import Path
 
 import pandas as pd
+from dotenv import load_dotenv
 from pandas import DataFrame
 from sqlalchemy import inspect
 from sqlalchemy.dialects.postgresql import insert
@@ -12,6 +14,11 @@ from sqlalchemy.schema import CreateSchema
 
 from exceptions import AuditWriteError, EmptySourceFileError, SchemaCreationError
 from models.audit import AuditRecord
+
+load_dotenv()
+
+AUDIT_TABLE_NAME = environ.get("AUDIT_TABLE_NAME", "ingestion_runs")
+AUDIT_SCHEMA = environ.get("AUDIT_SCHEMA", "audit")
 
 logger = logging.getLogger(__name__)
 
@@ -101,9 +108,9 @@ def write_audit(
 
     audit_row = audit_record.to_df()
     audit_row.to_sql(
-        name="ingestion_runs",
+        name=AUDIT_TABLE_NAME,
         con=engine,
-        schema="audit",
+        schema=AUDIT_SCHEMA,
         if_exists="append",
         index=False,
     )
