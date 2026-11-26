@@ -1,4 +1,9 @@
-{% macro macro_safe_drop_pk(relation, constraint_name) %}
+{#
+  Drops a primary key constraint (and a leftover index with the same name)
+  on a relation and on its dbt backup table, so that a post-hook can
+  re-create the constraint after a table rebuild.
+#}
+{% macro safe_drop_pk(relation, constraint_name) %}
   {% set backup_table = adapter.get_relation(
       database=relation.database,
       schema=relation.schema,

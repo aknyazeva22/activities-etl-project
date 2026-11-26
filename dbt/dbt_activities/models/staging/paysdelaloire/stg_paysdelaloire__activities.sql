@@ -81,7 +81,7 @@ filtered as (
         ) as is_address_given
     from renamed
     -- keep only activities with at least one contact detail
-    where {{ macro_contact_info() }}
+    where {{ has_contact_info() }}
 )
 
 select
