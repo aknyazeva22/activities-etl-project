@@ -1,0 +1,35 @@
+version: 2
+
+models:
+  - name: int_activities__current
+    description: >
+      Current state of each activity: one row per activity_key, the latest
+      version by ingested_at, then source_row_number. Same columns as
+      stg_paysdelaloire__activities (see its documentation); only the columns
+      with tests or a different meaning are listed here.
+    columns:
+      - name: activity_key
+        description: Best-effort business key, unique in this model (primary key)
+        data_tests:
+          - not_null
+          - unique
+
+      - name: offer_name
+        description: Name of the tourist offer
+        data_tests:
+          - not_null
+
+      - name: latitude
+        description: Latitude
+        data_tests:
+          - not_null
+
+      - name: longitude
+        description: Longitude
+        data_tests:
+          - not_null
+
+      - name: ingested_at
+        description: Timestamp of the ingestion this version comes from
+        data_tests:
+          - not_null

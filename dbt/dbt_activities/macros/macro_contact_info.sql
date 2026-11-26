@@ -1,10 +1,12 @@
 {% macro macro_contact_info(model) %}
-  "Adresse1" IS NOT NULL OR
-  "Adresse1Suite" IS NOT NULL OR
-  "Adresse partie 2" IS NOT NULL OR
-  "Adresse partie 3" IS NOT NULL OR
-  "N° de téléphone mobile" IS NOT NULL OR
-  "N° de téléphone fixe" IS NOT NULL OR
-  "Url du site web" IS NOT NULL OR
-  "Adresse e-Mail" IS NOT NULL
+  (
+    address_line1 is not null
+    or address_line2 is not null
+    or address_line3 is not null
+    or address_line4 is not null
+    or mobile_phone_number is not null
+    or landline_number is not null
+    or website is not null
+    or email is not null
+  )
 {% endmacro %}

@@ -1,6 +1,18 @@
--- models/staging/staging_degustation_data.sql
+-- Staging model for Pays de la Loire "Activités touristiques".
+-- Renames source columns to English snake_case, adds is_address_given,
+-- keeps only activities with contact details and adds activity_key.
+--
+-- TODO(ADR-001): the column mapping below still follows the former
+-- degustation dataset. Check every source column against the activities
+-- schema. Degustation-only columns (wine_appellation, free_tastings,
+-- tasting_room, on_site_sales) probably have no equivalent: remove them
+-- here and in _paysdelaloire__models.yml, and add the activity columns.
 
-with src as (
+with source as (
+    select * from {{ source('paysdelaloire', 'activities') }}
+),
+
+renamed as (
     select
         "Nom de l'offre touristique" as offer_name,
         "Type d'offre" as offer_type,
@@ -8,7 +20,7 @@ with src as (
         "Adresse1Suite" as address_line2,
         "Adresse partie 2" as address_line3,
         "Adresse partie 3" as address_line4,
-        CAST("Code postal" as {{ dbt.type_string() }}) as postal_code,
+        cast("Code postal" as {{ dbt.type_string() }}) as postal_code,
         "Bureau distributeur de l'adresse postale" as postal_office,
         "Commune du lieu de visite" as city_name,
         "Cedex" as cedex,
@@ -49,49 +61,39 @@ with src as (
         "Langue(s) parlée(s) pendant les visites" as languages_of_guided_visits,
         "Visites libres proposées aux individuels en permanence: oui / " as regular_self_guided_individual_visits,
         "Les offres proposées" as activity_type,
-        COALESCE(
-            "Adresse1" is not NULL
-            and "Adresse1Suite" is not NULL
-            and "Adresse partie 2" is not NULL
-            and "Adresse partie 3" is not NULL, FALSE
-        ) as is_address_given,
         source_row_number,
         ingestion_id,
         ingested_at,
         source_file_name,
         source_system,
         source_hash
-
-    from {{ source('raw', 'raw_degustation_data') }}
-    -- excludes activities with no contact info
-    where not {{ macro_contact_info() }}
-
+    from source
 ),
 
-normalized as (
+filtered as (
     select
         *,
-        LOWER(TRIM(COALESCE(offer_name, ''))) as offer_name_norm,
-        LOWER(TRIM(COALESCE(address_line1, ''))) as address1_norm,
-        LOWER(TRIM(COALESCE(address_line2, ''))) as address2_norm,
-        LOWER(TRIM(COALESCE(address_line3, ''))) as address3_norm,
-        LOWER(TRIM(COALESCE(address_line4, ''))) as address4_norm,
-        LOWER(TRIM(COALESCE(postal_code, ''))) as postal_code_norm,
-        LOWER(TRIM(COALESCE(city_name, ''))) as city_norm,
-        CAST(ROUND(CAST(latitude as numeric), 5) as text) as lat_norm,
-        CAST(ROUND(CAST(longitude as numeric), 5) as text) as lon_norm
-    from src
+        (
+            address_line1 is not null
+            or address_line2 is not null
+            or address_line3 is not null
+            or address_line4 is not null
+        ) as is_address_given
+    from renamed
+    -- keep only activities with at least one contact detail
+    where {{ macro_contact_info() }}
 )
 
 select
     *,
-  {{ dbt_utils.generate_surrogate_key([
-      'offer_name_norm',
-      'address1_norm',
-      'address2_norm',
-      'address3_norm',
-      'address4_norm',
-      'postal_code_norm',
-      'city_norm',
-  ]) }} as activity_key
-from normalized
+    -- best-effort business key: normalised name + address
+    {{ dbt_utils.generate_surrogate_key([
+        "lower(trim(coalesce(offer_name, '')))",
+        "lower(trim(coalesce(address_line1, '')))",
+        "lower(trim(coalesce(address_line2, '')))",
+        "lower(trim(coalesce(address_line3, '')))",
+        "lower(trim(coalesce(address_line4, '')))",
+        "lower(trim(coalesce(postal_code, '')))",
+        "lower(trim(coalesce(city_name, '')))",
+    ]) }} as activity_key
+from filtered
