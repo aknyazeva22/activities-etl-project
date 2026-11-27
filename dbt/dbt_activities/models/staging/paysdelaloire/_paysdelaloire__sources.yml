@@ -11,8 +11,7 @@ sources:
     schema: raw
     tables:
       - name: activities
-        # TODO(ADR-001): change table name to raw_activities.
-        identifier: raw_degustation_data
+        identifier: raw_activities
         description: >
           Raw "Activités touristiques" offers
           (234400034_070-011_offre-touristique-activites-rpdl).
