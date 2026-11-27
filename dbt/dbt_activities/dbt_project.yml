@@ -30,6 +30,8 @@ clean-targets:         # directories to be removed by `dbt clean`
 # directory as views. These settings can be overridden in the individual model
 # files using the `{{ config(...) }}` macro.
 models:
-  activities:
-    activities_raw:
+  dbt_activities:
+    staging:
+      +materialized: table
+    intermediate:
       +materialized: table
