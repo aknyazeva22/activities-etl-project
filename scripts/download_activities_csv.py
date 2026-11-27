@@ -21,7 +21,7 @@ def download_csv(url: str, destination: Path, chunk_size: int = 8192) -> None:
 
 
 if __name__ == "__main__":
-    DOWNLOAD_URL = "https://data.paysdelaloire.fr/api/explore/v2.1/catalog/datasets/234400034_070-010_offre-touristique-degustations-rpdl/exports/csv?lang=fr&timezone=Europe%2FBerlin&use_labels=true&delimiter=%3B"
+    DOWNLOAD_URL = "https://data.paysdelaloire.fr/explore/dataset/234400034_070-011_offre-touristique-activites-rpdl/download?format=csv&lang=fr&timezone=Europe%2FBerlin&use_labels=true&delimiter=%3B"
     OUTPUT_FILE = "data/activities.csv"
 
     try:
