@@ -87,11 +87,11 @@ added later as new sources.
   column layout is no longer used anywhere, including tests (see ADR-002).
 
 ### Follow-ups
-- [ ] Check the activities dataset schema and its update frequency
-- [ ] Decide the business key for an activity
-- [ ] Rename models and assets, and update the README
+- [x] Check the activities dataset schema and its update frequency
+- [x] Decide the business key for an activity
+- [x] Rename models and assets, and update the README
 - [ ] Rewrite test fixtures to the activities schema
-- [ ] Add a CHANGELOG entry under `Changed` (source switch) and `Removed`
+- [x] Add a CHANGELOG entry under `Changed` (source switch) and `Removed`
   (degustation source)
 
 ## References

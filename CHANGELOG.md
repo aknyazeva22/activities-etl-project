@@ -10,6 +10,7 @@ Versions 0.1.0 to 0.6.0 were reconstructed from git history.
 ## [Unreleased]
 
 ### Changed
+- dbt models and Dagster assets renamed from degustations to activities (#1)
 - dbt macros renamed (`75dfe3d`)
 - dbt project reorganised: `staging/paysdelaloire/` and `intermediate/` layers, dbt naming conventions (`stg_<source>__<entity>`, `int_...`), yml files next to their models (`3302d19`, `75dfe3d`)
 - The current-state table moved from staging to the intermediate layer (`int_activities__current`) (`3302d19`)
@@ -23,6 +24,7 @@ Versions 0.1.0 to 0.6.0 were reconstructed from git history.
 - Documentation used `code_postal` instead of `postal_code` (`3302d19`)
 
 ### Removed
+- Link to degustation source (#1)
 - Documentation for the non-existent `activities_raw` model (`3302d19`)
 
 ## [0.7.0] - 2026-11-27 — Architecture Decision Records and ingestion review
