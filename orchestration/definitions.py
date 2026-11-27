@@ -40,8 +40,8 @@ defs = Definitions(
     assets=[
         dbt_models,
         assets.dbt_profiles,
-        assets.degustations_file,
-        assets.degustations_raw_table,
+        assets.activities_file,
+        assets.activities_raw_table,
     ],
     resources={
         "dbt": dbt_cli,

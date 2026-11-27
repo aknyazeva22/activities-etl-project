@@ -7,10 +7,10 @@ from sqlalchemy import inspect
 from scripts.db import get_engine
 from scripts.load_raw_data import push_to_table, read_raw_data
 
-CSV_PATH = "data/degustations.csv"
-TABLE_NAME = "raw_degustation_data"
+CSV_PATH = "data/activities.csv"
+TABLE_NAME = "raw_activity_data"
 SCHEMA = os.environ.get("DB_SCHEMA", "public")
-SOURCE_SYSTEM = "degustations_csv"
+SOURCE_SYSTEM = "activities_csv"
 
 
 # Configure dbt
@@ -26,35 +26,35 @@ def dbt_profiles(context: AssetExecutionContext) -> None:
     runpy.run_module("scripts.generate_profiles", run_name="__main__")
 
 
-# Get csv file with degustations
+# Get csv file with activities
 @asset(
-    description="Raw degustation activities downloaded from the Pays de la Loire tourism API.",
+    description="Raw touristic activities downloaded from the Pays de la Loire tourism API.",
     compute_kind="python",
 )
-def degustations_file(context: AssetExecutionContext) -> None:
+def activities_file(context: AssetExecutionContext) -> None:
     """
-    Download degustations.csv from the Pays de la Loire tourism API.
+    Download activities.csv from the Pays de la Loire tourism API.
     """
     context.log.info("Running extract step")
-    runpy.run_module("scripts.download_degustation_csv", run_name="__main__")
+    runpy.run_module("scripts.download_activities_csv", run_name="__main__")
 
 
 # Create raw data table
 @asset(
-    deps=[degustations_file, dbt_profiles],
-    description="Raw degustation table.",
+    deps=[activities_file, dbt_profiles],
+    description="Table with raw activities data.",
     compute_kind="python",
 )
-def degustations_raw_table(context: AssetExecutionContext) -> None:
+def activities_raw_table(context: AssetExecutionContext) -> None:
     """
-    Load degustations.csv into PostgreSQL as a raw table.
+    Load activities.csv into PostgreSQL as a raw table.
     """
     df = read_raw_data(CSV_PATH)
     context.log.info("Running load step")
     engine = get_engine()
     # check if tables exist
-    if not inspect(engine).has_table("raw.raw_degustation_data") or not inspect(engine).has_table(
-        "raw_degustation_data"
+    if not inspect(engine).has_table("raw.raw_activity_data") or not inspect(engine).has_table(
+        "raw_activity_data"
     ):
         runpy.run_module("scripts.run_migrations", run_name="__main__")
 

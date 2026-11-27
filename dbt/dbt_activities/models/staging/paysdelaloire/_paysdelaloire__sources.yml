@@ -17,8 +17,7 @@ sources:
           (234400034_070-011_offre-touristique-activites-rpdl).
         meta:
           dagster:
-            # Must match the asset key of the Python raw load asset.
-            asset_key: ["degustations_raw_table"]
+            asset_key: ["activities_raw_table"]
         columns:
           - name: id
             description: Row identifier in the raw table
