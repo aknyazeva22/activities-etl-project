@@ -167,7 +167,7 @@ def push_to_table(
 
         inserted_rows = (
             df.to_sql(
-                name="raw_degustation_data",
+                name="raw_activity_data",
                 con=engine,
                 schema="raw",
                 if_exists=if_exists,
