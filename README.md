@@ -1,4 +1,4 @@
-# ELT Project: Degustation Data Pipeline
+# ELT Project: Tourist Activities Data Pipeline
 
 This project provisions a PostgreSQL server and builds a complete ELT pipeline:
 - **Extract/Load**: raw data is ingested using Python.
@@ -21,7 +21,7 @@ This ELT pipeline includes:
 
 2. **Data loading** from a CSV file into the raw schema with a Python script
 
-3. **Data transformation** using dbt to build a cleaned table with degustation information
+3. **Data transformation** using dbt to build a cleaned table with activities information
 
 4. **Pipeline orchestration** with Dagster
 
@@ -32,7 +32,7 @@ This ELT pipeline includes:
 This project demonstrates how to build an **ELT pipeline**
 for ingesting and modeling open tourist data related to
 the *Pays de la Loire* region in France, with a focus on
-degustation activities (wine tasting, local products, etc.).
+tourist activities.
 
 The data originates from the official regional open data portal:
 https://data.paysdelaloire.fr/
@@ -43,7 +43,7 @@ The primary goals of this project are to:
 - Support both local development and cloud-based deployments
 - Provide a reliable foundation for downstream analytical and data-driven use cases
 
-While the current implementation focuses on degustation data,
+While the current implementation focuses on activities data,
 the pipeline is designed to be easily extended to other types of
 tourist activities published by the region.
 
@@ -79,8 +79,8 @@ language responses with factual, up-to-date regional information.
 
 ## Data Model & Transformations
 
-The source dataset describes degustation-related tourist offers published on *Data.paysdelaloire.fr*, the open data platform of the Pays de la Loire Region.
-It contains descriptive, geographic, and categorical information about tourist degustation activities.
+The source dataset describes tourist offers published on *Data.paysdelaloire.fr*, the open data platform of the Pays de la Loire Region.
+It contains descriptive, geographic, and categorical information about tourist activities.
 
 The source columns can be broadly grouped into:
 - Identification
@@ -93,7 +93,7 @@ The source columns can be broadly grouped into:
 
 The raw layer contains data ingested from the source CSV with minimal transformation. Its structure closely mirrors the source dataset.
 
-The source schema and column definitions can be found on the official platform: <https://data.paysdelaloire.fr/explore/dataset/234400034_070-010_offre-touristique-degustations-rpdl/information/>
+The source schema and column definitions can be found on the official platform: <https://data.paysdelaloire.fr/explore/dataset/234400034_070-011_offre-touristique-activites-rpdl/information/>
 
 Added technical metadata columns:
 - Source row number (source_row_number)
