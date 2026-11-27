@@ -1,0 +1,21 @@
+version: 2
+
+macros:
+  - name: has_contact_info
+    description: >
+      Boolean SQL expression, true when an activity has at least one contact
+      detail (address line, mobile or landline phone, website, email).
+      Expects staging (renamed) column names.
+
+  - name: safe_drop_pk
+    description: >
+      Drops a primary key constraint and any leftover index with the same
+      name, on the relation and on its `__dbt_backup` table. Used in a
+      post-hook before re-creating the constraint after a table rebuild.
+    arguments:
+      - name: relation
+        type: relation
+        description: The model relation, usually `this`.
+      - name: constraint_name
+        type: string
+        description: Name of the primary key constraint to drop.
