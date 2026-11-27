@@ -1,4 +1,4 @@
-create table if not exists raw.raw_degustation_data (
+create table if not exists raw.raw_activity_data (
     id bigserial primary key,
 
     ingestion_id uuid not null,
