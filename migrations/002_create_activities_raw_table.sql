@@ -69,6 +69,6 @@ create table if not exists raw.raw_activity_data (
     "Modes de paiement acceptés" text,
     "localisation" text,
     "departement" text,
-    constraint uq_degustations_raw_source_hash
+    constraint uq_activities_raw_source_hash
         unique (source_hash)
 );
