@@ -9,6 +9,24 @@ Versions 0.1.0 to 0.6.0 were reconstructed from git history.
 
 ## [Unreleased]
 
+### Changed
+- dbt macros renamed (`75dfe3d`)
+- dbt project reorganised: `staging/paysdelaloire/` and `intermediate/` layers, dbt naming conventions (`stg_<source>__<entity>`, `int_...`), yml files next to their models (`3302d19`, `75dfe3d`)
+- The current-state table moved from staging to the intermediate layer (`int_activities__current`) (`3302d19`)
+
+### Fixed
+- Folder config in `dbt_project.yml` pointed to a non-existent project and was ignored (`3302d19`)
+- Filter on contact details had wrong operator precedence (`not a or b ...`) (`3302d19`)
+- `is_address_given` was true only when all four address lines were filled (`3302d19`)
+- Helper columns (`*_norm`, `row_num`) no longer leak into model outputs (`3302d19`)
+- Test on `guided_group_visit_on_request` was never run (missing `tests:` key) (`3302d19`)
+- Documentation used `code_postal` instead of `postal_code` (`3302d19`)
+
+### Removed
+- Documentation for the non-existent `activities_raw` model (`3302d19`)
+
+## [0.7.0] - 2026-11-27 — Architecture Decision Records and ingestion review
+
 ### Added
 - Architecture Decision Records: ADR-001 (choice of source dataset) and ADR-002 (source data in the repository and test fixtures) in docs/adr/ (`992b400`)
 - Ingestion run audit table, created via migrations (`0f9e468`)
