@@ -11,7 +11,7 @@ sources:
     schema: raw
     tables:
       - name: activities
-        identifier: raw_activities
+        identifier: raw_activity_data
         description: >
           Raw "Activités touristiques" offers
           (234400034_070-011_offre-touristique-activites-rpdl).
